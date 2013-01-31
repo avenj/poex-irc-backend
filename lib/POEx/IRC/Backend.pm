@@ -15,25 +15,18 @@ use POEx::IRC::Backend::Connector;
 use POEx::IRC::Backend::Listener;
 use POEx::IRC::Backend::_Util;
 
-use Net::IP::Minimal qw/
-  ip_is_ipv6
-/;
+use Net::IP::Minimal 'ip_is_ipv6';
 
-## FIXME make zlib and ssl optional
-##  clients don't need zlib
 use POE qw/
   Session
 
   Wheel::ReadWrite
   Wheel::SocketFactory
-
   Component::SSLify
 
   Filter::Stackable
-
   Filter::IRCv3
   Filter::Line
-  Filter::Zlib::Stream
 /;
 
 use Socket qw/
@@ -44,9 +37,18 @@ use Socket qw/
 
 use Try::Tiny;
 
-
 use namespace::clean;
 
+our %_Has;
+try {
+  require POE::Filter::Zlib::Stream;
+  $_Has{zlib} = 1
+};
+
+sub has_optional {
+  my ($val) = @_;
+  $_Has{$val}
+}
 
 has 'session_id' => (
   ## Session ID for own session.
@@ -457,30 +459,10 @@ sub remove_listener {
 }
 
 sub _remove_listener {
-  ## Delete listeners by ID or by port.
-  ## FIXME delete by addr+port combo ?
   my ($kernel, $self) = @_[KERNEL, OBJECT];
   my %args = @_[ARG0 .. $#_];
 
   $args{lc $_} = delete $args{$_} for keys %args;
-
-  if (defined $args{port}) {
-    LISTENER: for my $id (keys %{ $self->listeners }) {
-      my $listener = $self->listeners->{$id};
-      if ($args{port} == $listener->port) {
-        delete $self->listeners->{$id};
-
-        $listener->clear_wheel;
-
-        $kernel->post( $self->controller,
-          'ircsock_listener_removed',
-          $listener
-        );
-      }
-    } ## LISTENER
-
-    return
-  }
 
   if (defined $args{listener} && $self->listeners->{ $args{listener} }) {
     my $listener = delete $self->listeners->{ $args{listener} };
@@ -491,8 +473,33 @@ sub _remove_listener {
       'ircsock_listener_removed',
       $listener
     );
+
+    return
   }
 
+  my @removed;
+
+  LISTENER: for my $id (keys %{ $self->listeners }) {
+    my $listener = $self->listeners->{$id};
+    if (defined $args{port} && defined $args{addr}) {
+      if ($args{addr} eq $listener->addr && $args{port} eq $listener->port) {
+        delete $self->listeners->{$id};
+        push @removed, $listener;
+        next LISTENER
+      }
+    } elsif (defined $args{addr} && $args{addr} eq $listener->addr) {
+      delete $self->listeners->{$id};
+      push @removed, $listener;
+    } elsif (defined $args{port} && $args{port} eq $listener->port) {
+      delete $self->listeners->{$id};
+      push @removed, $listener;
+    }
+  }
+
+  for my $listener (@removed) {
+    $listener->clear_wheel;
+    $kernel->post( $self->controller, ircsock_listener_removed => $listener );
+  }
 }
 
 sub create_connector {
@@ -799,6 +806,9 @@ sub _disconnected {
 sub set_compressed_link {
   my ($self, $w_id) = @_;
 
+  confess "set_compressed_link requires POE::Filter::Zlib::Stream"
+    unless has_optional('zlib');
+
   confess "set_compressed_link() needs a wheel ID"
     unless defined $w_id;
 
@@ -812,9 +822,12 @@ sub set_compressed_link {
 sub set_compressed_link_now {
   my ($self, $w_id) = @_;
 
+  confess "set_compressed_link requires POE::Filter::Zlib::Stream"
+    unless has_optional('zlib');
+
   confess "set_compressed_link() needs a wheel ID"
     unless defined $w_id;
-
+ 
   my $this_conn;
   return unless $this_conn = $self->wheels->{$w_id};
 
@@ -877,20 +890,20 @@ POEx::IRC::Backend - IRC client or server sockets
   $poe_kernel->post( $backend->session_id, 'register' );
 
   $backend->create_listener(
-    bindaddr => ADDR,
-    port     => PORT,
+    bindaddr => $addr,
+    port     => $port,
     ## Optional:
-    ipv6     => BOOLEAN,
-    ssl      => BOOLEAN,
+    ipv6     => 1,
+    ssl      => 1,
   );
 
   $backend->create_connector(
-    remoteaddr => ADDR,
-    remoteport => PORT,
+    remoteaddr => $remote,
+    remoteport => $remoteport,
     ## Optional:
-    bindaddr => ADDR,
-    ipv6     => BOOLEAN,
-    ssl      => BOOLEAN,
+    bindaddr => $bindaddr,
+    ipv6     => 1,
+    ssl      => 1,
   );
 
   ## Handle and dispatch incoming IRC events.
@@ -910,9 +923,11 @@ POEx::IRC::Backend - IRC client or server sockets
 
 =head1 DESCRIPTION
 
-A L<POE> IRC backend socket handler based loosely on
-L<POE::Component::Server::IRC>.
+A L<POE> IRC backend socket handler using L<POE::Filter::IRCv3> and
+L<IRC::Toolkit>.
 
+This can be used by either clients or servers to speak IRC protocol via
+L<IRC::Message::Object> (see L<IRC::Toolkit>) objects.
 
 =head2 Methods
 
@@ -961,7 +976,18 @@ that holds a L<POE::Wheel::SocketFactory> listener wheel.
 
 =head3 remove_listener
 
-FIXME
+    $backend->remove_listener(
+      listener => $listener_id,
+    );
+
+    ## or via addr, port, or combination thereof:
+    $backend->remove_listener(
+      addr => '127.0.0.1',
+      port => 6667,
+    );
+
+Removes a listener and clears its B<wheel> attribute; the socket shuts down
+when the L<POE::Wheel::SocketFactory> wheel goes out of scope.
 
 =head3 disconnect
 
@@ -1133,11 +1159,18 @@ means of acknowledging the controlling session.
 
 C<$_[ARG0]> is the Backend's C<$self> object.
 
+=head1 SEE ALSO
+
+L<IRC::Toolkit>
+
+L<POE::Filter::IRCv3>
+
 =head1 AUTHOR
 
 Jon Portnoy <avenj@cobaltirc.org>
 
-Modelled on L<POE::Component::Server::IRC::Backend>
+Inspiration derived from L<POE::Component::Server::IRC::Backend> and
+L<POE::Component::IRC>
 
 =cut
 
