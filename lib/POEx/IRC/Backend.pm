@@ -229,7 +229,7 @@ sub _shutdown {
 
   ## _disconnected should also clear our alarms.
   $self->_disconnected($_, "Server shutdown")
-    for keys %{ $self->wheels };
+    for keys %{ $self->wheels // {} };
 
   $self->_clear_listeners;
   $self->_clear_connectors;
