@@ -25,7 +25,6 @@ has 'bindaddr' => (
 );
 
 has 'args' => (
-  ## FIXME are we using this?
   lazy    => 1,
   is      => 'ro',
   writer  => 'set_args',
@@ -101,7 +100,7 @@ The local address this Connector should bind to.
 
 =head2 args
 
-Extra arguments specified in Connector construction, as a HASH.
+Arbitrary metadata attached to this Connector. (By default, this is a HASH.)
 
 =head2 port
 

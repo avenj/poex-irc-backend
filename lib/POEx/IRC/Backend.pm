@@ -10,11 +10,6 @@ use MooX::Types::MooseLike::Base ':all';
 
 use IRC::Message::Object 'ircmsg';
 
-use POEx::IRC::Backend::Connect;
-use POEx::IRC::Backend::Connector;
-use POEx::IRC::Backend::Listener;
-use POEx::IRC::Backend::_Util;
-
 use Net::IP::Minimal 'ip_is_ipv6';
 
 use POE qw/
@@ -37,7 +32,14 @@ use Socket qw/
 
 use Try::Tiny;
 
+use POEx::IRC::Backend::Connect;
+use POEx::IRC::Backend::Connector;
+use POEx::IRC::Backend::Listener;
+use POEx::IRC::Backend::_Util;
+
+
 use namespace::clean;
+
 
 our %_Has;
 try {
@@ -49,6 +51,7 @@ sub has_optional {
   my ($val) = @_;
   $_Has{$val}
 }
+
 
 has 'session_id' => (
   ## Session ID for own session.
@@ -72,7 +75,7 @@ has 'controller' => (
 has 'filter_irc' => (
   lazy    => 1,
   isa     => InstanceOf['POE::Filter'],
-  is      => 'rwp',
+  is      => 'ro',
   default => sub {
     POE::Filter::IRCv3->new(colonify => 1)
   },
@@ -81,7 +84,7 @@ has 'filter_irc' => (
 has 'filter_line' => (
   lazy    => 1,
   isa     => InstanceOf['POE::Filter'],
-  is      => 'rwp',
+  is      => 'ro',
   default => sub {
     POE::Filter::Line->new(
       InputRegexp   => '\015?\012',
@@ -93,7 +96,7 @@ has 'filter_line' => (
 has 'filter' => (
   lazy    => 1,
   isa     => InstanceOf['POE::Filter'],
-  is      => 'rwp',
+  is      => 'ro',
   default => sub {
     my ($self) = @_;
     POE::Filter::Stackable->new(
@@ -125,30 +128,6 @@ has 'wheels' => (
   is      => 'ro',
   default => sub { {} },
   clearer => '_clear_wheels',
-);
-
-
-has '__backend_class_prefix' => (
-  is      => 'rw',
-  default => sub { 'POEx::IRC::Backend::' },
-);
-
-has '__backend_listener_class' => (
-  lazy    => 1,
-  is      => 'rw',
-  default => sub { $_[0]->__backend_class_prefix . 'Listener' },
-);
-
-has '__backend_connector_class' => (
-  lazy    => 1,
-  is      => 'rw',
-  default => sub { $_[0]->__backend_class_prefix . 'Connector' },
-);
-
-has '__backend_connect_class' => (
-  lazy    => 1,
-  is      => 'rw',
-  default => sub { $_[0]->__backend_class_prefix . 'Connect' },
 );
 
 
@@ -235,9 +214,8 @@ sub _stop {
 sub shutdown {
   my $self = shift;
 
-  $poe_kernel->post( $self->session_id,
-    'shutdown',
-    @_
+  $poe_kernel->post( $self->session_id => 
+    shutdown => @_ 
   );
 
   1
@@ -266,7 +244,9 @@ sub _register_controller {
 
   $kernel->refcount_increment( $self->controller, "IRCD Running" );
 
-  $kernel->post( $self->controller, 'ircsock_registered', $self );
+  $kernel->post( $self->controller => 
+    ircsock_registered => $self 
+  );
 }
 
 sub _accept_conn {
@@ -306,7 +286,7 @@ sub _accept_conn {
 
   my $w_id = $wheel->ID;
 
-  my $this_conn = $self->__backend_connect_class->new(
+  my $this_conn = POEx::IRC::Backend::Connect->new(
     protocol => $protocol,
     wheel    => $wheel,
 
@@ -330,9 +310,8 @@ sub _accept_conn {
     )
   );
 
-  $poe_kernel->post( $self->controller,
-    'ircsock_listener_open',
-    $this_conn
+  $poe_kernel->post( $self->controller => 
+    ircsock_listener_open => $this_conn
   );
 }
 
@@ -342,16 +321,13 @@ sub _idle_alarm {
 
   my $this_conn = $self->wheels->{$w_id} || return;
 
-  $kernel->post( $self->controller,
-    'ircsock_connection_idle',
-    $this_conn
+  $kernel->post( $self->controller => 
+    ircsock_connection_idle => $this_conn
   );
 
   $this_conn->alarm_id(
-    $kernel->delay_set(
-      '_idle_alarm',
-      $this_conn->idle,
-      $w_id
+    $kernel->delay_set( _idle_alarm => 
+      $this_conn->idle, $w_id
     )
   );
 }
@@ -365,9 +341,8 @@ sub _accept_fail {
   if ($listener) {
     $listener->clear_wheel;
 
-    $kernel->post( $self->controller,
-      'ircsock_listener_failure',
-      $listener, $op, $errnum, $errstr
+    $kernel->post( $self->controller => 
+      ircsock_listener_failure => $listener, $op, $errnum, $errstr
     );
   }
 }
@@ -419,7 +394,7 @@ sub _create_listener {
 
   my $id = $wheel->ID;
 
-  my $listener = $self->__backend_listener_class->new(
+  my $listener = POEx::IRC::Backend::Listener->new(
     protocol => $protocol,
     wheel => $wheel,
     addr  => $bindaddr,
@@ -435,9 +410,8 @@ sub _create_listener {
   $listener->set_port($port) if $port;
 
   ## Tell our controller session
-  $kernel->post( $self->controller,
-    'ircsock_listener_created',
-    $listener
+  $kernel->post( $self->controller => 
+    ircsock_listener_created => $listener
   );
 }
 
@@ -450,9 +424,8 @@ sub remove_listener {
   confess "remove_listener requires either port => or listener => params"
     unless defined $args{port} or defined $args{listener};
 
-  $poe_kernel->post( $self->session_id,
-    'remove_listener',
-    @_
+  $poe_kernel->post( $self->session_id =>
+    remove_listener => @_
   );
 
   $self
@@ -469,9 +442,8 @@ sub _remove_listener {
 
     $listener->clear_wheel;
 
-    $kernel->post( $self->controller,
-      'ircsock_listener_removed',
-      $listener
+    $kernel->post( $self->controller =>
+      ircsock_listener_removed => $listener
     );
 
     return
@@ -498,16 +470,17 @@ sub _remove_listener {
 
   for my $listener (@removed) {
     $listener->clear_wheel;
-    $kernel->post( $self->controller, ircsock_listener_removed => $listener );
+    $kernel->post( $self->controller => 
+      ircsock_listener_removed => $listener 
+    );
   }
 }
 
 sub create_connector {
   my $self = shift;
 
-  $poe_kernel->post( $self->session_id,
-    'create_connector',
-    @_
+  $poe_kernel->post( $self->session_id =>
+    create_connector => @_
   );
 
   $self
@@ -555,7 +528,7 @@ sub _create_connector {
 
   my $id = $wheel->ID;
 
-  $self->connectors->{$id} = $self->__backend_connector_class->new(
+  $self->connectors->{$id} = POEx::IRC::Backend::Connector->new(
     wheel     => $wheel,
     addr      => $remote_addr,
     port      => $remote_port,
@@ -615,7 +588,7 @@ sub _connector_up {
   my ($protocol, $sockaddr, $sockport)
     = get_unpacked_addr($sock_packed);
 
-  my $this_conn = $self->__backend_connect_class->new(
+  my $this_conn = POEx::IRC::Backend::Connect->new(
     protocol => $protocol,
     wheel    => $wheel,
     peeraddr => $peeraddr,
@@ -623,22 +596,15 @@ sub _connector_up {
     sockaddr => $sockaddr,
     sockport => $sockport,
     seen => time,
-    ## FIXME some way to set an idle timeout for these?
-    ##  otherwise defaults to 180 ...
   );
-
-  ## FIXME?
-  ##  Doesn't currently spawn an idle alarm for this conn
-  ##  (Presumably a remote server)
-  ##  No big deal for connect-time since the Connector will time-out
-  ##  However, no idle event is sent so higher levels won't ping out . . .
 
   $self->wheels->{$w_id} = $this_conn;
 
-  $kernel->post( $self->controller,
-    'ircsock_connector_open',
-    $this_conn
+  $kernel->post( $self->controller => 
+    ircsock_connector_open => $this_conn
   );
+
+  ## FIXME hum. should we be setting an idle_alarm?
 }
 
 sub _connector_failed {
@@ -648,9 +614,8 @@ sub _connector_failed {
   my $ct = delete $self->connectors->{$c_id};
   $ct->clear_wheel;
 
-  $kernel->post( $self->controller,
-    'ircsock_connector_failure',
-    $ct, $op, $errno, $errstr
+  $kernel->post( $self->controller =>
+    ircsock_connector_failure => $ct, $op, $errno, $errstr
   );
 }
 
@@ -672,13 +637,10 @@ sub _ircsock_input {
     if $this_conn->has_alarm_id;
 
   ## FIXME configurable raw events?
-  ## FIXME anti-flood code or should that be higher up ... ?
 
   ## Send ircsock_input to controller/dispatcher
-  $kernel->post( $self->controller,
-    'ircsock_input',
-    $this_conn,
-    ircmsg(%$input)
+  $kernel->post( $self->controller => 
+    ircsock_input => $this_conn, ircmsg(%$input)
   );
 }
 
@@ -794,10 +756,8 @@ sub _disconnected {
   ## has been disconnected (no longer has a wheel).
   $this_conn->clear_wheel;
 
-  $poe_kernel->post( $self->controller,
-    'ircsock_disconnect',
-    $this_conn,
-    $str
+  $poe_kernel->post( $self->controller => 
+    ircsock_disconnect => $this_conn, $str
   );
 
   1
@@ -838,9 +798,8 @@ sub set_compressed_link_now {
   $this_conn->is_pending_compress(0);
   $this_conn->set_compressed(1);
 
-  $poe_kernel->post( $self->controller,
-    'ircsock_compressed',
-    $this_conn
+  $poe_kernel->post( $self->controller =>
+    ircsock_compressed => $this_conn
   );
 
   $self
@@ -926,8 +885,12 @@ POEx::IRC::Backend - IRC client or server sockets
 A L<POE> IRC backend socket handler using L<POE::Filter::IRCv3> and
 L<IRC::Toolkit>.
 
-This can be used by either clients or servers to speak IRC protocol via
-L<IRC::Message::Object> (see L<IRC::Toolkit>) objects.
+This can be used by client/server libraries to speak IRC protocol via
+L<IRC::Message::Object> objects.
+
+This module is part of a set of IRC building blocks that have been 
+split out of a much larger project.
+Take a gander at L<POE::Component::IRC> for a fully-featured IRC library.
 
 =head2 Methods
 
