@@ -910,6 +910,26 @@ Predicate: B<has_controller>
 
 A HASH of active Connector objects, keyed on their wheel ID.
 
+=head3 filter
+
+A L<POE::Filter::Stackable> instance consisting of the current L</filter_irc>
+stacked with L</filter_line> (at the time the attribute is built).
+
+=head3 filter_irc
+
+A L<POE::Filter::IRCv3> instance with B<colonify> enabled, by default.
+
+A client-side Backend will probably want a non-colonifying filter:
+
+  my $backend = POEx::IRC::Backend->new(
+    filter_irc => POE::Filter::IRCv3->new(colonify => 0),
+    ...
+  );
+
+=head3 filter_line
+
+A L<POE::Filter::Line> instance.
+
 =head3 listeners
 
 HASH of active Listener objects, keyed on their wheel ID.

@@ -16,19 +16,19 @@ has 'addr' => (
   writer   => 'set_addr',
 );
 
+has 'args' => (
+  lazy    => 1,
+  is      => 'ro',
+  writer  => 'set_args',
+  default => sub { {} },
+);
+
 has 'bindaddr' => (
   lazy      => 1,
   is        => 'ro',
   predicate => 'has_bindaddr',
   writer    => 'set_bindaddr',
   default => sub { '' },
-);
-
-has 'args' => (
-  lazy    => 1,
-  is      => 'ro',
-  writer  => 'set_args',
-  default => sub { {} },
 );
 
 has 'port' => (
