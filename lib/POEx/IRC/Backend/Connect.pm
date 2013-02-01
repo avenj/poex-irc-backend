@@ -202,6 +202,10 @@ The remote peer address.
 
 The remote peer port.
 
+=head2 protocol
+
+The protocol in use (4 or 6).
+
 =head2 seen
 
 Timestamp; should be updated when traffic is seen from this Connect:

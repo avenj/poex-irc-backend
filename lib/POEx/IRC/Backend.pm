@@ -41,6 +41,12 @@ use POEx::IRC::Backend::_Util;
 use namespace::clean;
 
 
+=pod
+
+=for Pod::Coverage has_optional
+
+=cut
+
 our %_Has;
 try {
   require POE::Filter::Zlib::Stream;
@@ -58,8 +64,7 @@ has 'session_id' => (
   init_arg  => undef,
   lazy      => 1,
   is        => 'ro',
-  writer    => 'set_session_id',
-  predicate => 'has_session_id',
+  writer    => '_set_session_id',
   default   => sub { undef },
 );
 
@@ -68,7 +73,7 @@ has 'controller' => (
   ## Typically set by 'register' event
   lazy      => 1,
   is        => 'ro',
-  writer    => 'set_controller',
+  writer    => '_set_controller',
   predicate => 'has_controller',
 );
 
@@ -203,7 +208,7 @@ sub spawn {
 
 sub _start {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
-  $self->set_session_id( $_[SESSION]->ID );
+  $self->_set_session_id( $_[SESSION]->ID );
   $kernel->refcount_increment( $self->session_id, "IRCD Running" );
 }
 
@@ -240,7 +245,7 @@ sub _register_controller {
   ## 'register' event sets a controller session.
   my ($kernel, $self) = @_[KERNEL, OBJECT];
 
-  $self->set_controller( $_[SENDER]->ID );
+  $self->_set_controller( $_[SENDER]->ID );
 
   $kernel->refcount_increment( $self->controller, "IRCD Running" );
 
@@ -311,7 +316,7 @@ sub _accept_conn {
   );
 
   $poe_kernel->post( $self->controller => 
-    ircsock_listener_open => $this_conn
+    ircsock_listener_open => $this_conn, $listener
   );
 }
 
@@ -661,8 +666,7 @@ sub _ircsock_flushed {
   ## Socket's been flushed; we may have something to do.
   my ($kernel, $self, $w_id) = @_[KERNEL, OBJECT, ARG0];
 
-  my $this_conn;
-  return unless $this_conn = $self->wheels->{$w_id};
+  my $this_conn = $self->wheels->{$w_id} || return;
 
   if ($this_conn->is_disconnecting) {
     $self->_disconnected(
@@ -726,7 +730,8 @@ sub disconnect {
   confess "disconnect() needs a wheel ID"
     unless defined $w_id;
 
-  return unless $self->wheels->{$w_id};
+  confess "disconnect() called for nonexistant wheel ID $w_id"
+    unless defined $self->wheels->{$w_id};
 
   $self->wheels->{$w_id}->is_disconnecting(
     $str || "Client disconnect"
@@ -889,8 +894,34 @@ This can be used by client/server libraries to speak IRC protocol via
 L<IRC::Message::Object> objects.
 
 This module is part of a set of IRC building blocks that have been 
-split out of a much larger project.
+split out of a much larger project; it is also early 'alpha-quality' software.
 Take a gander at L<POE::Component::IRC> for a fully-featured IRC library.
+
+
+=head2 Attributes
+
+=head3 controller
+
+Retrieve the L<POE::Session> ID for the backend's registered controller.
+
+Predicate: B<has_controller>
+
+=head3 connectors
+
+A HASH of active Connector objects, keyed on their wheel ID.
+
+=head3 listeners
+
+HASH of active Listener objects, keyed on their wheel ID.
+
+=head3 session_id
+
+Returns the backend's session ID.
+
+=head3 wheels
+
+HASH of actively connected wheels, keyed on their wheel ID.
+
 
 =head2 Methods
 
@@ -903,10 +934,6 @@ Take a gander at L<POE::Component::IRC> for a fully-featured IRC library.
       'server.cert',
     ],
   );
-
-=head3 controller
-
-Retrieve session ID for the backend's registered controller.
 
 =head3 create_connector
 
@@ -963,20 +990,25 @@ disconnection.
 
   $backend->send(
     {
-      prefix  =>
-      params  =>
-      command =>
+      prefix  => $prefix,
+      params  => [ @params ],
+      command => $cmd,
     },
-
-    $conn_id,
+    @connect_ids
   );
 
+  use IRC::Message::Object 'ircmsg';
+  my $msg = ircmsg(
+    command => 'PRIVMSG',
+    params  => [ $chan, $string ],
+  );
+  $backend->send( $msg, $connect_id );
+
 Feeds L<POE::Filter::IRCv3> and sends the resultant raw IRC 
-line to the specified connection wheel ID.
+line to the specified connection wheel ID(s).
 
-=head3 session_id
-
-Returns the backend's session ID.
+Accepts either an L<IRC::Message::Object> or a HASH compatible with
+L<POE::Filter::IRCv3> -- look there for details.
 
 =head3 set_compressed_link
 
@@ -1109,6 +1141,8 @@ Dispatched when a listener accepts a connection.
 
 C<$_[ARG0]> is the connection's L<POEx::IRC::Backend::Connect>
 
+C<$_[ARG1]> is the connection's L<POEx::IRC::Backend::Listener>
+
 =head3 ircsock_listener_removed
 
 Dispatched when a Listener has been removed.
@@ -1122,6 +1156,15 @@ means of acknowledging the controlling session.
 
 C<$_[ARG0]> is the Backend's C<$self> object.
 
+
+=head1 BUGS
+
+Probably lots. Please report them via RT, e-mail, or GitHub
+(L<http://github.com/avenj/poex-irc-backend>).
+
+Tests are a bit incomplete, as of this writing. 
+Zlib and SSL are mostly untested.
+
 =head1 SEE ALSO
 
 L<IRC::Toolkit>
@@ -1133,7 +1176,7 @@ L<POE::Filter::IRCv3>
 Jon Portnoy <avenj@cobaltirc.org>
 
 Inspiration derived from L<POE::Component::Server::IRC::Backend> and
-L<POE::Component::IRC>
+L<POE::Component::IRC> by BINGOS, HINRIK et al
 
 =cut
 
