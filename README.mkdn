@@ -326,7 +326,8 @@ means of acknowledging the controlling session.
 Probably lots. Please report them via RT, e-mail, or GitHub
 ([http://github.com/avenj/poex-irc-backend](http://github.com/avenj/poex-irc-backend)).
 
-Tests are a bit incomplete, as of this writing.
+Tests are a bit incomplete, as of this writing. 
+Zlib and SSL are mostly untested.
 
 # SEE ALSO
 
