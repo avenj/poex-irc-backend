@@ -29,7 +29,6 @@ has 'idle'  => (
 
 has 'port'  => (
   required => 1,
-  isa      => Int,
   is       => 'ro',
   writer   => 'set_port',
 );

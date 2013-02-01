@@ -74,7 +74,6 @@ has 'peeraddr' => (
 
 has 'peerport' => (
   required => 1,
-  isa      => Int,
   is       => 'ro',
   writer   => 'set_peerport',
 );
@@ -110,7 +109,6 @@ has 'sockaddr' => (
 
 has 'sockport' => (
   required => 1,
-  isa      => Int,
   is       => 'ro',
   writer   => 'set_sockport',
 );
