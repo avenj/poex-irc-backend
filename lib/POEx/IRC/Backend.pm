@@ -115,24 +115,26 @@ has 'filter' => (
 has 'listeners' => (
   init_arg => undef,
   is      => 'ro',
+  writer  => '_set_listeners',
   default => sub { {} },
-  clearer => '_clear_listeners',
 );
 
 ## POEx::IRC::Backend::Connector objs
 ## These are outgoing (peer) connectors.
 has 'connectors' => (
+  init_arg => undef,
   is      => 'ro',
+  writer  => '_set_connectors',
   default => sub { {} },
-  clearer => '_clear_connectors',
 );
 
 ## POEx::IRC::Backend::Connect objs
 ## These are our connected wheels.
 has 'wheels' => (
+  init_arg => undef,
   is      => 'ro',
+  writer  => '_set_wheels',
   default => sub { {} },
-  clearer => '_clear_wheels',
 );
 
 
@@ -236,9 +238,9 @@ sub _shutdown {
   $self->_disconnected($_, "Server shutdown")
     for keys %{ $self->wheels // {} };
 
-  $self->_clear_listeners;
-  $self->_clear_connectors;
-  $self->_clear_wheels;
+  for my $attr (map {; '_set_'.$_ } qw/ listeners connectors wheels /) {
+    $self->$attr({})
+  }
 }
 
 sub _register_controller {
