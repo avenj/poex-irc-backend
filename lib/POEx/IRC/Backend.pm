@@ -633,9 +633,6 @@ sub _ircsock_input {
   ## Retrieve Backend::Connect
   my $this_conn = $self->wheels->{$w_id};
 
-  ## Disconnecting? Don't care.
-  return if $this_conn->is_disconnecting;
-
   ## Adjust last seen and idle alarm
   $this_conn->seen( time );
   $kernel->delay_adjust( $this_conn->alarm_id, $this_conn->idle )
@@ -711,10 +708,8 @@ sub send {
 
   }
 
-  unless (@ids && ref $out eq 'HASH') {
-    carp "send() takes a HASH and a list of connection IDs";
-    return
-  }
+  confess "send() takes a HASH and a list of connection IDs"
+    unless ref $out eq 'HASH' and @ids;
 
   for my $id (grep { $self->wheels->{$_} } @ids) {
     $self->wheels->{$id}->wheel->put( $out );
