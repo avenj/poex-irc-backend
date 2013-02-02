@@ -358,9 +358,8 @@ sub _accept_fail {
 sub create_listener {
   my $self = shift;
 
-  $poe_kernel->post( $self->session_id,
-    'create_listener',
-    @_
+  $poe_kernel->post( $self->session_id =>
+    create_listener => @_
   );
 
   $self
@@ -424,12 +423,6 @@ sub _create_listener {
 
 sub remove_listener {
   my $self = shift;
-
-  my %args = @_;
-  $args{lc $_} = delete $args{$_} for keys %args;
-
-  confess "remove_listener requires either port => or listener => params"
-    unless defined $args{port} or defined $args{listener};
 
   $poe_kernel->post( $self->session_id =>
     remove_listener => @_
