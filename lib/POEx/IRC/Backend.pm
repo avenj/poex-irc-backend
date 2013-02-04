@@ -689,12 +689,7 @@ sub send {
   if ( is_Object($out) ) {
 
     if      ( $out->isa('IRC::Message::Object') ) {
-      $out = +{
-        command => $out->command,
-        ( $out->has_prefix ? (prefix  => $out->prefix) : () ),
-        ( $out->has_params ? (params  => $out->params) : () ),
-        ( $out->has_tags ?   (tags => $out->tags) : ()      ),
-      };
+      $out = +{%$out};
     } else {
       confess "No idea what to do with $out",
     }

@@ -133,10 +133,12 @@ sub ircsock_input {
   my ($k, $backend) = @_[KERNEL, HEAP];
   my ($conn, $ev)   = @_[ARG0 .. $#_];
 
-  $got->{'got ircsock_input'}++;
-
   isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
   isa_ok( $ev, 'IRC::Message::Object' );
+
+  if ($ev->params->[0] eq 'testing') {
+    $got->{'got ircsock_input'}++;
+  }
 
   ## FIXME test ->disconnect() behavior
 
