@@ -878,6 +878,7 @@ L<IRC::Message::Object> objects.
 
 This module is part of a set of IRC building blocks that have been 
 split out of a much larger project; it is also early 'alpha-quality' software.
+
 Take a gander at L<POE::Component::IRC> for a fully-featured IRC library.
 
 
