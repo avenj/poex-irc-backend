@@ -9,6 +9,7 @@ use MooX::Types::MooseLike::Base ':all';
 
 use namespace::clean;
 
+with 'POEx::IRC::Backend::Role::HasWheel';
 
 has alarm_id => (
   ## Idle alarm ID.
@@ -114,28 +115,6 @@ has sockport => (
 );
 
 
-has wheel_id => (
-  ## Actual POE wheel ID.
-  lazy      => 1,
-  is        => 'ro',
-  writer    => '_set_wheel_id',
-);
-
-
-has wheel => (
-  ## Actual POE::Wheel
-  required  => 1,
-  isa       => InstanceOf['POE::Wheel'],
-  is        => 'ro',
-  clearer   => 'clear_wheel',
-  writer    => 'set_wheel',
-  predicate => 'has_wheel',
-  trigger   => sub {
-    my ($self, $wheel) = @_;
-    $self->_set_wheel_id( $wheel->ID )
-  },
-);
-
 1;
 
 =pod
@@ -154,6 +133,9 @@ connection.
 These objects contain details regarding connected socket 
 L<POE::Wheel::ReadWrite> wheels managed by 
 L<POEx::IRC::Backend>.
+
+Consumes L<POEx::IRC::Backend::Role::HasWheel> and adds the following
+attributes:
 
 =head2 alarm_id
 
@@ -218,18 +200,10 @@ Our socket address.
 
 Our socket port.
 
-=head2 wheel
-
-The L<POE::Wheel::ReadWrite> wheel instance.
-
-=head2 wheel_id
-
-The (last known) wheel ID.
-
 =head1 AUTHOR
 
 Jon Portnoy <avenj@cobaltirc.org>
 
-=for Pod::Coverage set_\w+
+=for Pod::Coverage set_[A-Za-z_]+
 
 =cut
