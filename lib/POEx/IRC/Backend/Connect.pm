@@ -146,7 +146,9 @@ timer. Writable attribute.
 
 Set to true if the Zlib filter has been added.
 
-B<set_compressed> can be used to alter the value.
+=head2 set_compressed
+
+Change the boolean value of the L</compressed> attrib.
 
 =head2 idle
 
@@ -204,6 +206,6 @@ Our socket port.
 
 Jon Portnoy <avenj@cobaltirc.org>
 
-=for Pod::Coverage set_[A-Za-z_]+
+=for Pod::Coverage set_(?:peer|sock)(?:addr|port)
 
 =cut

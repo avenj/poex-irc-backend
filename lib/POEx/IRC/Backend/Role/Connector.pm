@@ -60,9 +60,10 @@ The local address we are bound to.
 
 The local port we are listening on.
 
-=for Pod::Coverage set_port
+=head2 set_port
 
-B<set_port> can be used to alter the current port attribute.
+Change the current port attribute.
+
 This won't trigger any automatic L</wheel> changes (at this time), 
 but it is useful when creating a listener on port 0.
 

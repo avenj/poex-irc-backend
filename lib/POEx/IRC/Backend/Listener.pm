@@ -45,11 +45,4 @@ Can be altered via B<set_idle>
 
 Jon Portnoy <avenj@cobaltirc.org>
 
-=begin Pod::Coverage
-
-  set_\w+
-
-=end Pod::Coverage
-
-
 =cut
