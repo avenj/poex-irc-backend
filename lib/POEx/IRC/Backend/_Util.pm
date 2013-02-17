@@ -1,5 +1,11 @@
 package POEx::IRC::Backend::_Util;
 
+=pod
+
+=for Pod::Coverage get_unpacked_addr
+
+=cut
+
 use strictures 1;
 use Carp;
 
