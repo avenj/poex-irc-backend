@@ -866,16 +866,18 @@ POEx::IRC::Backend - IRC client or server sockets
 A L<POE> IRC backend socket handler using L<POE::Filter::IRCv3> and
 L<IRC::Toolkit>.
 
-This can be used by client/server libraries to speak IRC protocol via
+This can be used by client or server libraries to speak IRC protocol via
 L<IRC::Message::Object> objects.
+
+This is a basic low-level interface to IRC connections; 
+see L<POEx::IRC::Client::Lite> for an experimental IRC client library using
+this backend.
 
 This module is part of a set of IRC building blocks that have been 
 split out of a much larger project; it is also early 'alpha-quality' software.
 
-See L<POEx::IRC::Client::Lite> for an experimental IRC client library using
-this backend.
-
-Take a gander at L<POE::Component::IRC> for a mature, fully-featured IRC library.
+Take a gander at L<POE::Component::IRC> for a mature, fully-featured IRC
+client library.
 
 =head2 Attributes
 
@@ -1154,7 +1156,6 @@ Dispatched when a L</register> event has been successfully received, as a
 means of acknowledging the controlling session.
 
 C<$_[ARG0]> is the Backend's C<$self> object.
-
 
 =head1 BUGS
 
