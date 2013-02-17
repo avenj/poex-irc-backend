@@ -38,15 +38,6 @@ use POEx::IRC::Backend::Listener;
 use POEx::IRC::Backend::_Util;
 
 
-use namespace::clean;
-
-
-=pod
-
-=for Pod::Coverage has_optional
-
-=cut
-
 our %_Has;
 try {
   require POE::Filter::Zlib::Stream;
@@ -59,7 +50,10 @@ sub has_optional {
 }
 
 
-has 'session_id' => (
+use namespace::clean;
+
+
+has session_id => (
   ## Session ID for own session.
   init_arg  => undef,
   lazy      => 1,
@@ -68,7 +62,7 @@ has 'session_id' => (
   default   => sub { undef },
 );
 
-has 'controller' => (
+has controller => (
   ## Session ID for controller session
   ## Typically set by 'register' event
   lazy      => 1,
@@ -77,7 +71,7 @@ has 'controller' => (
   predicate => 'has_controller',
 );
 
-has 'filter_irc' => (
+has filter_irc => (
   lazy    => 1,
   isa     => InstanceOf['POE::Filter'],
   is      => 'ro',
@@ -86,7 +80,7 @@ has 'filter_irc' => (
   },
 );
 
-has 'filter_line' => (
+has filter_line => (
   lazy    => 1,
   isa     => InstanceOf['POE::Filter'],
   is      => 'ro',
@@ -98,7 +92,7 @@ has 'filter_line' => (
   },
 );
 
-has 'filter' => (
+has filter => (
   lazy    => 1,
   isa     => InstanceOf['POE::Filter'],
   is      => 'ro',
@@ -112,7 +106,7 @@ has 'filter' => (
 
 ## POEx::IRC::Backend::Listener objs
 ## These are listeners for a particular port.
-has 'listeners' => (
+has listeners => (
   init_arg => undef,
   is      => 'ro',
   writer  => '_set_listeners',
@@ -121,7 +115,7 @@ has 'listeners' => (
 
 ## POEx::IRC::Backend::Connector objs
 ## These are outgoing (peer) connectors.
-has 'connectors' => (
+has connectors => (
   init_arg => undef,
   is      => 'ro',
   writer  => '_set_connectors',
@@ -130,7 +124,7 @@ has 'connectors' => (
 
 ## POEx::IRC::Backend::Connect objs
 ## These are our connected wheels.
-has 'wheels' => (
+has wheels => (
   init_arg => undef,
   is      => 'ro',
   writer  => '_set_wheels',
@@ -193,11 +187,9 @@ sub spawn {
       POE::Component::SSLify::SSLify_Options(
         @{ $args{ssl_opts} }
       );
-
       1
     } catch {
       $ssl_err = $_;
-
       undef
     } or confess "SSLify failure: $ssl_err";
   }
@@ -215,17 +207,13 @@ sub _start {
 }
 
 sub _stop {
-
 }
 
 sub shutdown {
   my $self = shift;
-
   $poe_kernel->post( $self->session_id => 
     shutdown => @_ 
-  );
-
-  1
+  )
 }
 
 sub _shutdown {
