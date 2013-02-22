@@ -121,7 +121,7 @@ has sockport => (
 
 =head1 NAME
 
-POEx::IRC::Backend::Connect - Connected socket wheel details
+POEx::IRC::Backend::Connect - A connectoed socket wheel
 
 =head1 SYNOPSIS
 

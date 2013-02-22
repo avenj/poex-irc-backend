@@ -817,7 +817,7 @@ q{
 
 =head1 NAME
 
-POEx::IRC::Backend - IRC client or server sockets
+POEx::IRC::Backend - IRC client or server backend
 
 =head1 SYNOPSIS
 
