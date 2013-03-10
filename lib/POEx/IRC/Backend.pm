@@ -246,7 +246,7 @@ sub _register_controller {
 
 sub _accept_conn {
   ## Accepted connection to a listener.
-  my ($kernel, $self) = @_[KERNEL, OBJECT];
+  my (undef, $self) = @_[KERNEL, OBJECT];
   my ($sock, $p_addr, $p_port, $listener_id) = @_[ARG0 .. ARG3];
 
   ## Our peer's addr.
@@ -400,7 +400,7 @@ sub _create_listener {
   $self->listeners->{$id} = $listener;
 
   ## Real bound port/addr
-  my ($proto, $addr, $port) = get_unpacked_addr( $wheel->getsockname );
+  my (undef, undef, $port) = get_unpacked_addr( $wheel->getsockname );
   $listener->set_port($port) if $port;
 
   ## Tell our controller session
@@ -482,7 +482,7 @@ sub _create_connector {
   ##  bindaddr =>
   ##  ipv6 =>
   ##  ssl  =>
-  my ($kernel, $self) = @_[KERNEL, OBJECT];
+  my (undef, $self) = @_[KERNEL, OBJECT];
   my %args = @_[ARG0 .. $#_];
 
   $args{lc $_} = delete $args{$_} for keys %args;
@@ -631,7 +631,7 @@ sub _ircsock_input {
 
 sub _ircsock_error {
   ## Lost someone.
-  my ($kernel, $self) = @_[KERNEL, OBJECT];
+  my (undef, $self) = @_[KERNEL, OBJECT];
   my ($errstr, $w_id) = @_[ARG2, ARG3];
 
   my $this_conn = $self->wheels->{$w_id} || return;
@@ -644,7 +644,7 @@ sub _ircsock_error {
 
 sub _ircsock_flushed {
   ## Socket's been flushed; we may have something to do.
-  my ($kernel, $self, $w_id) = @_[KERNEL, OBJECT, ARG0];
+  my (undef, $self, $w_id) = @_[KERNEL, OBJECT, ARG0];
 
   my $this_conn = $self->wheels->{$w_id} || return;
 
@@ -820,6 +820,9 @@ q{
 POEx::IRC::Backend - IRC client or server backend
 
 =head1 SYNOPSIS
+
+  use POE;
+  use POEx::IRC::Backend;
 
   ## Spawn a Backend and register as the controlling session.
   my $backend = POEx::IRC::Backend->spawn(
