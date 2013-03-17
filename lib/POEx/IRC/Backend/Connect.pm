@@ -111,7 +111,7 @@ has sockaddr => (
 has sockport => (
   required => 1,
   is       => 'ro',
-  writer   => 'set_sockaddr',
+  writer   => 'set_sockport',
 );
 
 
