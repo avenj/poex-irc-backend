@@ -53,7 +53,7 @@ has session_id => (
 
 has controller => (
   ## Session ID for controller session
-  ## Typically set by 'register' event
+  ## Typically set by 'register' event, though it doesn't have to be:
   lazy      => 1,
   is        => 'ro',
   writer    => '_set_controller',
@@ -99,7 +99,7 @@ has listeners => (
   init_arg => undef,
   is      => 'ro',
   writer  => '_set_listeners',
-  default => sub { {} },
+  default => sub { +{} },
 );
 
 ## POEx::IRC::Backend::Connector objs
@@ -108,7 +108,7 @@ has connectors => (
   init_arg => undef,
   is      => 'ro',
   writer  => '_set_connectors',
-  default => sub { {} },
+  default => sub { +{} },
 );
 
 ## POEx::IRC::Backend::Connect objs
@@ -117,7 +117,7 @@ has wheels => (
   init_arg => undef,
   is      => 'ro',
   writer  => '_set_wheels',
-  default => sub { {} },
+  default => sub { +{} },
 );
 
 
@@ -224,6 +224,9 @@ sub _shutdown {
 sub _register_controller {
   ## 'register' event sets a controller session.
   my ($kernel, $self) = @_[KERNEL, OBJECT];
+
+  $kernel->refcount_decrement( $self->controller, "IRCD Running" )
+    if $self->has_controller;
 
   $self->_set_controller( $_[SENDER]->ID );
 
@@ -584,7 +587,7 @@ sub _connector_up {
     ircsock_connector_open => $this_conn
   );
 
-  ## FIXME hum. should we be setting an idle_alarm?
+  ## TODO document that we don't set an idle alarm for open Connectors
 }
 
 sub _connector_failed {
