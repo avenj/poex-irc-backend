@@ -1,5 +1,10 @@
 package POEx::IRC::Backend;
 
+## TODO
+# - try-catch all errors and dispatch them as events?
+#   (with optional debug warnings?)
+#   should apply to any die in an event handler preferably
+
 use 5.10.1;
 use strictures 1;
 
@@ -36,29 +41,14 @@ use POEx::IRC::Backend::Connector;
 use POEx::IRC::Backend::Listener;
 use POEx::IRC::Backend::_Util;
 
-
-our %_Has;
-try {
-  require POE::Filter::Zlib::Stream;
-  $_Has{zlib} = 1
-};
-
-sub has_optional {
-  my ($val) = @_;
-  $_Has{$val}
-}
-
-
 use namespace::clean;
 
 
 has session_id => (
-  ## Session ID for own session.
   init_arg  => undef,
   lazy      => 1,
   is        => 'ro',
   writer    => '_set_session_id',
-  default   => sub { undef },
 );
 
 has controller => (
@@ -227,7 +217,7 @@ sub _shutdown {
     for keys %{ $self->wheels // {} };
 
   for my $attr (map {; '_set_'.$_ } qw/ listeners connectors wheels /) {
-    $self->$attr({})
+    $self->$attr(+{})
   }
 }
 
@@ -749,8 +739,7 @@ sub _disconnected {
 sub set_compressed_link {
   my ($self, $w_id) = @_;
 
-  confess "set_compressed_link requires POE::Filter::Zlib::Stream"
-    unless has_optional('zlib');
+  require POE::Filter::Zlib::Stream;
 
   confess "set_compressed_link() needs a wheel ID"
     unless defined $w_id;
@@ -765,8 +754,7 @@ sub set_compressed_link {
 sub set_compressed_link_now {
   my ($self, $w_id) = @_;
 
-  confess "set_compressed_link requires POE::Filter::Zlib::Stream"
-    unless has_optional('zlib');
+  require POE::Filter::Zlib::Stream;
 
   confess "set_compressed_link() needs a wheel ID"
     unless defined $w_id;
