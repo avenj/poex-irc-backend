@@ -17,7 +17,6 @@ use POE qw/
 
   Wheel::ReadWrite
   Wheel::SocketFactory
-  Component::SSLify
 
   Filter::Stackable
   Filter::IRCv3
@@ -184,6 +183,7 @@ sub spawn {
 
     my $ssl_err;
     try {
+      require POE::Component::SSLify;
       POE::Component::SSLify::SSLify_Options(
         @{ $args{ssl_opts} }
       );
@@ -259,6 +259,7 @@ sub _accept_conn {
 
   if ( $listener->ssl ) {
     try {
+      require POE::Component::SSLify;
       $sock = POE::Component::SSLify::Client_SSLify($sock)
     } catch {
       warn "Could not SSLify (server) socket: $_";
@@ -548,6 +549,7 @@ sub _connector_up {
 
   if ( $ct->ssl ) {
     try {
+      require POE::Component::SSLify;
       $sock = POE::Component::SSLify::Client_SSLify($sock)
     } catch {
       warn "Could not SSLify (client) socket: $_";
@@ -824,20 +826,14 @@ POEx::IRC::Backend - IRC client or server backend
   use POE;
   use POEx::IRC::Backend;
 
-  ## Spawn a Backend and register as the controlling session.
-  my $backend = POEx::IRC::Backend->spawn(
-    ## See POE::Component::SSLify (SSLify_Options):
-    ssl_opts => [ ARRAY ],
-  );
-
+  ## Spawn a Backend and register as the controlling session:
+  my $backend = POEx::IRC::Backend->spawn;
   $poe_kernel->post( $backend->session_id, 'register' );
 
+  ## Listen for incoming IRC traffic:
   $backend->create_listener(
     bindaddr => $addr,
     port     => $port,
-    ## Optional:
-    ipv6     => 1,
-    ssl      => 1,
   );
 
   $backend->create_connector(
@@ -938,6 +934,8 @@ HASH of actively connected wheels, keyed on their wheel ID.
       'server.cert',
     ],
   );
+
+Creates the backend's L<POE::Session>.
 
 =head3 create_connector
 
