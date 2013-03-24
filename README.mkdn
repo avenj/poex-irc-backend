@@ -11,22 +11,27 @@ POEx::IRC::Backend - IRC client or server backend
     my $backend = POEx::IRC::Backend->spawn;
     $poe_kernel->post( $backend->session_id, 'register' );
 
+    sub ircsock_registered {
+      my ($kernel, $self) = @_[KERNEL, OBJECT];
+
     ## Listen for incoming IRC traffic:
     $backend->create_listener(
       bindaddr => $addr,
       port     => $port,
     );
 
-    $backend->create_connector(
-      remoteaddr => $remote,
-      remoteport => $remoteport,
-      ## Optional:
-      bindaddr => $bindaddr,
-      ipv6     => 1,
-      ssl      => 1,
-    );
+      ## Connect to a remote endpoint:
+      $backend->create_connector(
+        remoteaddr => $remote,
+        remoteport => $remoteport,
+        ## Optional:
+        bindaddr => $bindaddr,
+        ipv6     => 1,
+        ssl      => 1,
+      );
+    }
 
-    ## Handle and dispatch incoming IRC events.
+    ## Handle and dispatch incoming IRC events:
     sub ircsock_input {
       my ($kernel, $self) = @_[KERNEL, OBJECT];
 

@@ -1,10 +1,4 @@
 package POEx::IRC::Backend;
-
-## TODO
-# - try-catch all errors and dispatch them as events?
-#   (with optional debug warnings?)
-#   should apply to any die in an event handler preferably
-
 use 5.10.1;
 use strictures 1;
 
@@ -227,9 +221,7 @@ sub _register_controller {
 
   $kernel->refcount_decrement( $self->controller, "IRCD Running" )
     if $self->has_controller;
-
   $self->_set_controller( $_[SENDER]->ID );
-
   $kernel->refcount_increment( $self->controller, "IRCD Running" );
 
   $kernel->post( $self->controller => 
@@ -484,7 +476,7 @@ sub _create_connector {
   my $remote_addr = delete $args{remoteaddr};
   my $remote_port = delete $args{remoteport};
 
-  confess "_create_connector expects a RemoteAddr and RemotePort"
+  die "create_connector expects a RemoteAddr and RemotePort"
     unless defined $remote_addr and defined $remote_port;
 
   my $protocol = 4;
@@ -821,22 +813,27 @@ POEx::IRC::Backend - IRC client or server backend
   my $backend = POEx::IRC::Backend->spawn;
   $poe_kernel->post( $backend->session_id, 'register' );
 
-  ## Listen for incoming IRC traffic:
-  $backend->create_listener(
-    bindaddr => $addr,
-    port     => $port,
-  );
+  sub ircsock_registered {
+    my ($kernel, $self) = @_[KERNEL, OBJECT];
 
-  $backend->create_connector(
-    remoteaddr => $remote,
-    remoteport => $remoteport,
-    ## Optional:
-    bindaddr => $bindaddr,
-    ipv6     => 1,
-    ssl      => 1,
-  );
+    ## Listen for incoming IRC traffic:
+    $backend->create_listener(
+      bindaddr => $addr,
+      port     => $port,
+    );
 
-  ## Handle and dispatch incoming IRC events.
+    ## Connect to a remote endpoint:
+    $backend->create_connector(
+      remoteaddr => $remote,
+      remoteport => $remoteport,
+      ## Optional:
+      bindaddr => $bindaddr,
+      ipv6     => 1,
+      ssl      => 1,
+    );
+  }
+
+  ## Handle and dispatch incoming IRC events:
   sub ircsock_input {
     my ($kernel, $self) = @_[KERNEL, OBJECT];
 
