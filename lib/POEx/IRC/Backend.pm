@@ -25,6 +25,7 @@ use POE qw/
 use Socket qw/
   AF_INET AF_INET6
   pack_sockaddr_in
+  pack_sockaddr_in6
 /;
 
 use Try::Tiny;
@@ -233,11 +234,18 @@ sub _accept_conn {
   my (undef, $self) = @_[KERNEL, OBJECT];
   my ($sock, $p_addr, $p_port, $listener_id) = @_[ARG0 .. ARG3];
 
-  my $protocol  = $_[STATE] eq '_accept_conn_v6' ? 6 : 4 ;
-  my $un_p_addr = get_unpacked_addr(
-    (pack_sockaddr_in $p_port, $p_addr), 
-    noserv => 1
-  );
+  my ($un_p_addr, $protocol);
+  if ($_[STATE] eq '_accept_conn_v6') {
+    $protocol  = 6;
+    $un_p_addr = get_unpacked_addr( pack_sockaddr_in6($p_port, $p_addr),
+      noserv => 1
+    );
+  } else {
+    $protocol  = 4;
+    $un_p_addr = get_unpacked_addr( pack_sockaddr_in($p_port, $p_addr),
+      noserv => 1
+    );
+  }
 
   my $sock_packed = getsockname($sock);
   my ($sockaddr, $sockport) = get_unpacked_addr($sock_packed);
@@ -526,12 +534,19 @@ sub _connector_up {
   ## Created connector socket.
   my ($kernel, $self) = @_[KERNEL, OBJECT];
   my ($sock, $p_addr, $p_port, $c_id) = @_[ARG0 .. ARG3];
-  
-  my $protocol = $_[STATE] eq '_connector_up_v6' ? 6 : 4;
-  my $un_p_addr = get_unpacked_addr( 
-    pack_sockaddr_in( $p_port, $p_addr ), 
-    noserv => 1 
-  );
+
+  my ($protocol, $un_p_addr);
+  if ($_[STATE] eq '_connector_up_v6') {
+    $protocol  = 6;
+    $un_p_addr = get_unpacked_addr( pack_sockaddr_in6($p_port, $p_addr),
+      noserv => 1
+    );
+  } else {
+    $protocol  = 4;
+    $un_p_addr = get_unpacked_addr( pack_sockaddr_in($p_port, $p_addr),
+      noserv => 1
+    );
+  }
 
   ## No need to try to connect out any more; remove from connectors pool
   my $ct = delete $self->connectors->{$c_id};
