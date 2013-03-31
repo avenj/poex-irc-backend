@@ -25,7 +25,6 @@ use POE qw/
 use Socket qw/
   AF_INET AF_INET6
   pack_sockaddr_in
-  pack_sockaddr_in6
 /;
 
 use Try::Tiny;
@@ -237,9 +236,7 @@ sub _accept_conn {
   my ($un_p_addr, $protocol);
   if ($_[STATE] eq '_accept_conn_v6') {
     $protocol  = 6;
-    $un_p_addr = get_unpacked_addr( pack_sockaddr_in6($p_port, $p_addr),
-      noserv => 1
-    );
+    $un_p_addr = $p_addr;
   } else {
     $protocol  = 4;
     $un_p_addr = get_unpacked_addr( pack_sockaddr_in($p_port, $p_addr),
@@ -538,9 +535,7 @@ sub _connector_up {
   my ($protocol, $un_p_addr);
   if ($_[STATE] eq '_connector_up_v6') {
     $protocol  = 6;
-    $un_p_addr = get_unpacked_addr( pack_sockaddr_in6($p_port, $p_addr),
-      noserv => 1
-    );
+    $un_p_addr = $p_addr;
   } else {
     $protocol  = 4;
     $un_p_addr = get_unpacked_addr( pack_sockaddr_in($p_port, $p_addr),
