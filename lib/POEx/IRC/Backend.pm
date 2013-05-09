@@ -357,23 +357,17 @@ sub _create_listener {
 
   $args{lc $_} = delete $args{$_} for keys %args;
 
-  my $idle_time = delete $args{idle}     || 180;
+  my $bindaddr  = $args{bindaddr} || '0.0.0.0';
+  my $bindport  = $args{port}     || 0;
 
-  my $bindaddr  = delete $args{bindaddr} || '0.0.0.0';
-  my $bindport  = delete $args{port}     || 0;
-
-  my $protocol = 4;
-  $protocol = 6
-    if delete $args{ipv6} or ip_is_ipv6($bindaddr);
-
-  my $ssl = delete $args{ssl} || 0;
+  my $protocol = ( $args{ipv6} || ip_is_ipv6($bindaddr) ) ? 6 : 4;
 
   my $wheel = POE::Wheel::SocketFactory->new(
     SocketDomain => ($protocol == 6 ? AF_INET6 : AF_INET),
     BindAddress  => $bindaddr,
     BindPort     => $bindport,
     SuccessEvent => 
-      ($protocol == 6 ? '_accept_conn_v6' : '_accept_conn_v4' ),
+      ( $protocol == 6 ? '_accept_conn_v6' : '_accept_conn_v4' ),
     FailureEvent => '_accept_fail',
     Reuse        => 1,
   );
@@ -385,8 +379,8 @@ sub _create_listener {
     wheel => $wheel,
     addr  => $bindaddr,
     port  => $bindport,
-    idle  => $idle_time,
-    ssl   => $ssl,
+    idle  => ( $args{idle} || 180 ),
+    ssl   => ( $args{ssl}  || 0 ),
   );
 
   $self->listeners->{$id} = $listener;
@@ -474,6 +468,7 @@ sub _create_connector {
   ##  bindaddr =>
   ##  ipv6 =>
   ##  ssl  =>
+  ## ... other args get added to ->args()
   my (undef, $self) = @_[KERNEL, OBJECT];
   my %args = @_[ARG0 .. $#_];
 
@@ -485,9 +480,11 @@ sub _create_connector {
   die "create_connector expects a RemoteAddr and RemotePort"
     unless defined $remote_addr and defined $remote_port;
 
-  my $protocol = 4;
-  $protocol = 6
-    if delete $args{ipv6} or ip_is_ipv6($remote_addr);
+  my $protocol =
+      delete($args{ipv6})      ? 6
+    : ip_is_ipv6($remote_addr) ? 6
+    : ( $args{bindaddr} && ip_is_ipv6($args{bindaddr}) ) ? 6
+    : 4;
 
   my $wheel = POE::Wheel::SocketFactory->new(
     SocketDomain   => ($protocol == 6 ? AF_INET6 : AF_INET),

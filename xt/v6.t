@@ -51,7 +51,8 @@ sub shutdown {
   $k->alarm_remove_all;
   $k->post( $backend->session_id, 'shutdown' );
   if ($_[ARG0] && $_[ARG0] eq 'timeout') {
-    fail("Timed out")
+    fail("Timed out");
+    diag explain $got;
   }
 }
 
