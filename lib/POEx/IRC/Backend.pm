@@ -1,5 +1,4 @@
 package POEx::IRC::Backend;
-use 5.10.1;
 use strictures 1;
 
 use Carp;
@@ -207,7 +206,7 @@ sub _shutdown {
 
   ## _disconnected should also clear our alarms.
   $self->_disconnected($_, "Server shutdown")
-    for keys %{ $self->wheels // {} };
+    for keys %{ $self->wheels || {} };
 
   for my $attr (map {; '_set_'.$_ } qw/ listeners connectors wheels /) {
     $self->$attr(+{})
@@ -481,8 +480,8 @@ sub _create_connector {
     unless defined $remote_addr and defined $remote_port;
 
   my $protocol =
-      delete($args{ipv6})      ? 6
-    : ip_is_ipv6($remote_addr) ? 6
+      delete($args{ipv6})                                ? 6
+    : ip_is_ipv6($remote_addr)                           ? 6
     : ( $args{bindaddr} && ip_is_ipv6($args{bindaddr}) ) ? 6
     : 4;
 
