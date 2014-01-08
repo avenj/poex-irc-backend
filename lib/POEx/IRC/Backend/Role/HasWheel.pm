@@ -1,5 +1,4 @@
 package POEx::IRC::Backend::Role::HasWheel;
-use 5.10.1;
 use strictures 1;
 
 use Moo::Role;

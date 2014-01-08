@@ -243,7 +243,7 @@ sub _accept_conn {
     );
   }
 
-  my $sock_packed = getsockname($sock);
+  my $sock_packed = getsockname $sock;
   my ($sockaddr, $sockport) = get_unpacked_addr($sock_packed);
   my $listener = $self->listeners->{$listener_id};
 
@@ -252,7 +252,7 @@ sub _accept_conn {
       require POE::Component::SSLify;
       $sock = POE::Component::SSLify::Client_SSLify($sock)
     } catch {
-      warn "Could not SSLify (server) socket: $_";
+      warn "Could not SSLify (server) socket: $_\n";
       undef
     } or return;
   }
@@ -476,7 +476,7 @@ sub _create_connector {
   my $remote_addr = delete $args{remoteaddr};
   my $remote_port = delete $args{remoteport};
 
-  die "create_connector expects a RemoteAddr and RemotePort"
+  die "create_connector expects a RemoteAddr and RemotePort\n"
     unless defined $remote_addr and defined $remote_port;
 
   my $protocol =
@@ -547,7 +547,7 @@ sub _connector_up {
       require POE::Component::SSLify;
       $sock = POE::Component::SSLify::Client_SSLify($sock)
     } catch {
-      warn "Could not SSLify (client) socket: $_";
+      warn "Could not SSLify (client) socket: $_\n";
       undef
     } or return;
   }
@@ -569,7 +569,7 @@ sub _connector_up {
 
   my $w_id = $wheel->ID;
 
-  my $sock_packed = getsockname($sock);
+  my $sock_packed = getsockname $sock;
   my ($sockaddr, $sockport) = get_unpacked_addr($sock_packed);
 
   my $this_conn = POEx::IRC::Backend::Connect->new(
@@ -801,10 +801,10 @@ sub unset_compressed_link {
 ## FIXME listener connect ip blacklist?
 
 no warnings 'void';
-q{
- <CaptObviousman> pretend for a moment that I'm stuck with mysql
- <rnowak> ok, fetching my laughing hat and monocle
-};
+print
+ qq[<CaptObviousman> pretend for a moment that I'm stuck with mysql\n],
+ qq[<rnowak> ok, fetching my laughing hat and monocle\n],
+unless caller; 1;
 
 
 =pod
