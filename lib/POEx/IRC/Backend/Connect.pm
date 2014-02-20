@@ -1,12 +1,9 @@
 package POEx::IRC::Backend::Connect;
-use strictures 1;
+
 use Carp;
+use Types::Standard -all;
 
-use Moo;
-use MooX::Types::MooseLike::Base ':all';
-
-use namespace::clean;
-
+use Moo; use MooX::late;
 with 'POEx::IRC::Backend::Role::HasWheel';
 
 has alarm_id => (
@@ -22,8 +19,9 @@ has compressed => (
   ## zlib filter added.
   lazy    => 1,
   is      => 'rwp',
+  isa     => Bool,
   writer  => 'set_compressed',
-  default => sub { 0 },
+  default => sub { !!0 },
 );
 
 
@@ -31,6 +29,7 @@ has idle => (
   ## Idle delay.
   lazy    => 1,
   is      => 'rwp',
+  isa     => StrictNum,
   default => sub { 180 },
 );
 
@@ -38,28 +37,32 @@ has idle => (
 has is_client => (
   lazy    => 1,
   is      => 'rw',
-  default => sub { 0 },
+  isa     => Bool,
+  default => sub { !!0 },
 );
 
 
 has is_peer => (
   lazy    => 1,
   is      => 'rw',
-  default => sub { 0 },
+  isa     => Bool,
+  default => sub { !!0 },
 );
 
 
 has is_disconnecting => (
   ## Bool or string (disconnect message)
   is      => 'rw',
-  default => sub { 0 },
+  isa     => Bool,
+  default => sub { !!0 },
 );
 
 
 has is_pending_compress => (
   ## Wheel needs zlib filter after a socket flush.
   is      => 'rw',
-  default => sub { 0 },
+  isa     => Bool,
+  default => sub { !!0 },
 );
 
 
@@ -87,6 +90,7 @@ has protocol => (
   ## 4 or 6.
   required => 1,
   is       => 'ro',
+  isa      => StrictNum,
 );
 
 

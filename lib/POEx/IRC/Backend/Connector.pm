@@ -1,8 +1,6 @@
 package POEx::IRC::Backend::Connector;
-use strictures 1;
-use Moo;
-use namespace::clean;
 
+use Moo;
 with 'POEx::IRC::Backend::Role::Connector';
 
 has args => (
