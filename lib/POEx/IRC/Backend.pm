@@ -1,10 +1,7 @@
 package POEx::IRC::Backend;
+
 use strictures 1;
-
 use Carp;
-
-use Moo;
-use MooX::Types::MooseLike::Base ':all';
 
 use IRC::Message::Object 'ircmsg';
 
@@ -26,6 +23,9 @@ use Socket qw/
   pack_sockaddr_in
 /;
 
+use Types::Standard -all;
+use Types::TypeTiny -all;
+
 use Try::Tiny;
 
 use POEx::IRC::Backend::Connect;
@@ -33,7 +33,9 @@ use POEx::IRC::Backend::Connector;
 use POEx::IRC::Backend::Listener;
 use POEx::IRC::Backend::_Util;
 
+
 use namespace::clean;
+use Moo; use MooX::late;
 
 
 has session_id => (
@@ -90,6 +92,7 @@ has filter => (
 has listeners => (
   init_arg => undef,
   is      => 'ro',
+  isa     => HashRef,
   writer  => '_set_listeners',
   default => sub { +{} },
 );
@@ -99,6 +102,7 @@ has listeners => (
 has connectors => (
   init_arg => undef,
   is      => 'ro',
+  isa     => HashRef,
   writer  => '_set_connectors',
   default => sub { +{} },
 );
@@ -108,6 +112,7 @@ has connectors => (
 has wheels => (
   init_arg => undef,
   is      => 'ro',
+  isa     => HashRef,
   writer  => '_set_wheels',
   default => sub { +{} },
 );
