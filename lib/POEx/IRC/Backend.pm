@@ -117,6 +117,18 @@ has wheels => (
   default => sub { +{} },
 );
 
+## FIXME Types::TypeTiny has CodeLike
+my $is_callable = sub {
+  my ($cb) = @_;
+  !! ref $cb and reftype $cb eq 'CODE' or overload::Method($cb, '&{}')
+};
+## FIXME
+##   Take a ro ->limiter
+##    ->_conn_limiter TypedHash[IsCallable]
+##       $conn -> $coderef
+##       needs appropriate cleanup in _disconnected
+##    set_limiter with trigger to re-set all existing
+
 
 sub spawn {
   ## Create our object and session.
@@ -692,6 +704,21 @@ sub send {
 
   confess "send() takes a HASH and a list of connection IDs"
     unless ref $out eq 'HASH' and @ids;
+
+  ## FIXME
+  ##   Add a msg queue
+  ##   Add per-conn limiters (cloned from ->limiter ?)
+  ##   If we have no limiter configured, we can call() our actual send
+  ##   If we have a limiter, schedule an alarm id for designated time
+  ##     track these in a hash for _disconnected cleanup?
+  ##      need to drop the alarm id when it fires
+  ##      may be better to manage a timer pool ourselves?
+  ##        one timer pool per conn
+  ##        one alarm id per conn for timer pool
+  ##        if alarm id is scheduled already, leave it
+  ##        if not, new alarm scheduled for delay (record alarm id)
+  ##        alarm state should reset itself based on limiter
+  ##   Move the put() below to a POE state
 
   for my $id (grep { $self->wheels->{$_} } @ids) {
     $self->wheels->{$id}->wheel->put( $out );
