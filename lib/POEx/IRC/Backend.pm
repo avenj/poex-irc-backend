@@ -122,7 +122,7 @@ my $is_callable = sub {
   my ($cb) = @_;
   !! ref $cb and reftype $cb eq 'CODE' or overload::Method($cb, '&{}')
 };
-## FIXME
+## FIXME does this belong at client/daemon level? very possibly
 ##   Take a ro ->limiter
 ##    ->_conn_limiter TypedHash[IsCallable]
 ##       $conn -> $coderef
