@@ -53,7 +53,7 @@ has is_peer => (
 has is_disconnecting => (
   ## Bool or string (disconnect message)
   is      => 'rw',
-  isa     => Bool,
+  isa     => (Bool | Str),
   default => sub { !!0 },
 );
 
