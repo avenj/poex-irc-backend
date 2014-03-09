@@ -138,7 +138,7 @@ sub ircsock_input {
   if ($got->{'got ircsock_input'} == $expected->{'got ircsock_input'}) {
     ## Call for a listener removal to test listener_removed
     $backend->remove_listener(
-      addr => '127.0.0.1',
+      addr => '::0',
     );
   }
 }
