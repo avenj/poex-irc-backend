@@ -20,6 +20,8 @@ has bindaddr => (
 
 =pod
 
+=for Pod::Coverage has_\w+
+
 =head1 NAME
 
 POEx::IRC::Backend::Connector - An outgoing connector

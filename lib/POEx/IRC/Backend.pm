@@ -814,6 +814,8 @@ unless caller; 1;
 
 =pod
 
+=for Pod::Coverage has_\w+
+
 =head1 NAME
 
 POEx::IRC::Backend - IRC client or server backend

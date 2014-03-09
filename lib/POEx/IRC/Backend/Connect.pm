@@ -121,6 +121,8 @@ has sockport => (
 
 =pod
 
+=for Pod::Coverage has_\w+
+
 =head1 NAME
 
 POEx::IRC::Backend::Connect - A connectoed socket wheel
@@ -143,6 +145,8 @@ attributes:
 
 Connected socket wheels normally have a POE alarm ID attached for an idle 
 timer. Writable attribute.
+
+Predicate: B<has_alarm_id>
 
 =head2 compressed
 
