@@ -210,8 +210,7 @@ sub _shutdown {
   $kernel->refcount_decrement( $self->controller, "IRCD Running" );
 
   ## _disconnected should also clear our alarms.
-  $self->_disconnected($_, "Server shutdown")
-    for keys %{ $self->wheels || {} };
+  $self->_disconnected($_, "Server shutdown") for keys %{ $self->wheels }
 
   for my $attr (map {; '_set_'.$_ } qw/ listeners connectors wheels /) {
     $self->$attr(+{})
