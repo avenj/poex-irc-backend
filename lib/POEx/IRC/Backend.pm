@@ -648,25 +648,20 @@ sub send {
   ## ->send(HASH, ID [, ID .. ])
   my ($self, $out, @ids) = @_;
 
-  if ( is_Object($out) ) {
-
-    if      ( $out->isa('IRC::Message::Object') ) {
-      $out = +{
-        command => $out->command,
-        ( $out->has_prefix ? (prefix  => $out->prefix) : () ),
-        ( $out->has_params ? (params  => $out->params) : () ),
-        ( $out->has_tags   ? (tags    => $out->tags  ) : () ),
-      };
-    } else {
-      confess "No idea what to do with $out",
-    }
-
+  if (blessed $out && $out->isa('IRC::Message::Object')) {
+    $out = +{
+      command => $out->command,
+      ( $out->has_prefix ? (prefix  => $out->prefix) : () ),
+      ( $out->has_params ? (params  => $out->params) : () ),
+      ( $out->has_tags   ? (tags    => $out->tags  ) : () ),
+    };
   }
 
-  confess "send() takes a HASH and a list of connection IDs"
+  confess 
+    "send() takes a HASH or IRC::Message::Object and a list of connection IDs"
     unless ref $out eq 'HASH' and @ids;
 
-  for my $id (grep { $self->wheels->{$_} } @ids) {
+  for my $id (grep {; exists $self->wheels->{$_} } @ids) {
     $self->wheels->{$id}->wheel->put( $out );
   }
 
