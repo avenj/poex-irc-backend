@@ -672,11 +672,9 @@ sub disconnect {
   ## Mark a wheel for disconnection.
   my ($self, $w_id, $str) = @_;
 
-  confess "disconnect() needs a wheel ID"
-    unless defined $w_id;
-
-  confess "disconnect() called for nonexistant wheel ID $w_id"
-    unless defined $self->wheels->{$w_id};
+  confess "disconnect() needs an (extant) wheel ID"
+    unless defined $w_id
+    and    defined $self->wheels->{$w_id};
 
   $self->wheels->{$w_id}->is_disconnecting(
     $str || "Client disconnect"
@@ -978,6 +976,21 @@ line to the specified connection wheel ID(s).
 
 Accepts either an L<IRC::Message::Object> or a HASH compatible with
 L<POE::Filter::IRCv3> -- look there for details.
+
+Note that unroutable (target connection IDs with no matching live
+wheel) messages are silently dropped. You can check L</wheels> yourself before
+sending if this behavior is unwanted:
+
+  for my $target (@connect_ids) {
+    unless (exists $backend->wheels->{$target}) {
+      warn "Cannot send to nonexistant target '$target'";
+      next
+    }
+    $backend->send(
+        { prefix => $prefix, params => [ @params ], command => $cmd },
+        $target
+    );
+  }
 
 =head3 set_compressed_link
 
