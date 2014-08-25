@@ -171,9 +171,7 @@ sub spawn {
     my $ssl_err;
     try {
       require POE::Component::SSLify;
-      POE::Component::SSLify::SSLify_Options(
-        @{ $args{ssl_opts} }
-      );
+      POE::Component::SSLify::SSLify_Options( @{ $args{ssl_opts} } );
       1
     } catch {
       $ssl_err = $_;
@@ -198,19 +196,17 @@ sub _stop {
 
 sub shutdown {
   my $self = shift;
-  $poe_kernel->post( $self->session_id => 
-    shutdown => @_ 
-  )
+  $poe_kernel->post( $self->session_id => shutdown => @_ )
 }
 
 sub _shutdown {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
 
-  $kernel->refcount_decrement( $self->session_id, "IRCD Running" );
-  $kernel->refcount_decrement( $self->controller, "IRCD Running" );
+  $kernel->refcount_decrement( $self->session_id => "IRCD Running" );
+  $kernel->refcount_decrement( $self->controller => "IRCD Running" );
 
   ## _disconnected should also clear our alarms.
-  $self->_disconnected($_, "Server shutdown") for keys %{ $self->wheels }
+  $self->_disconnected($_, "Server shutdown") for keys %{ $self->wheels };
 
   for my $attr (map {; '_set_'.$_ } qw/ listeners connectors wheels /) {
     $self->$attr(+{})
@@ -221,14 +217,12 @@ sub _register_controller {
   ## 'register' event sets a controller session.
   my ($kernel, $self) = @_[KERNEL, OBJECT];
 
-  $kernel->refcount_decrement( $self->controller, "IRCD Running" )
+  $kernel->refcount_decrement( $self->controller => "IRCD Running" )
     if $self->has_controller;
   $self->_set_controller( $_[SENDER]->ID );
-  $kernel->refcount_increment( $self->controller, "IRCD Running" );
+  $kernel->refcount_increment( $self->controller => "IRCD Running" );
 
-  $kernel->post( $self->controller => 
-    ircsock_registered => $self 
-  );
+  $kernel->post( $self->controller => ircsock_registered => $self );
 }
 
 sub _accept_conn {
@@ -349,12 +343,6 @@ sub create_listener {
 }
 
 sub _create_listener {
-  ## Create a listener on a particular port.
-  ##  bindaddr =>
-  ##  port =>
-  ## [optional]
-  ##  ipv6 =>
-  ##  ssl  =>
   my ($kernel, $self) = @_[KERNEL, OBJECT];
   my %args = @_[ARG0 .. $#_];
 
@@ -392,7 +380,6 @@ sub _create_listener {
   my (undef, $port) = get_unpacked_addr( $wheel->getsockname );
   $listener->set_port($port) if $port;
 
-  ## Tell our controller session
   $kernel->post( $self->controller => 
     ircsock_listener_created => $listener
   );
@@ -401,9 +388,7 @@ sub _create_listener {
 sub remove_listener {
   my $self = shift;
 
-  $poe_kernel->post( $self->session_id =>
-    remove_listener => @_
-  );
+  $poe_kernel->post( $self->session_id => remove_listener => @_ );
 
   $self
 }
@@ -487,7 +472,7 @@ sub _create_connector {
       delete($args{ipv6})                                ? 6
     : ip_is_ipv6($remote_addr)                           ? 6
     : ( $args{bindaddr} && ip_is_ipv6($args{bindaddr}) ) ? 6
-    : 4;
+                                                         : 4;
 
   my $wheel = POE::Wheel::SocketFactory->new(
     SocketDomain   => ($protocol == 6 ? AF_INET6 : AF_INET),
@@ -871,15 +856,10 @@ L<IRC::Toolkit>.
 This can be used by client or server libraries to speak IRC protocol via
 L<IRC::Message::Object> objects.
 
-This is a basic low-level interface to IRC connections; 
-see L<POEx::IRC::Client::Lite> for an experimental IRC client library using
-this backend.
-
-This module is part of a set of IRC building blocks that have been 
-split out of a much larger project; it is also early 'alpha-quality' software.
-
-Take a gander at L<POE::Component::IRC> for a mature, fully-featured IRC
-client library.
+This is a basic low-level interface to IRC connections; see
+L<POEx::IRC::Client::Lite> for an experimental IRC client library using this
+backend or try L<POE::Component::IRC> for a mature, fully-featured IRC client
+library.
 
 =head2 Attributes
 
