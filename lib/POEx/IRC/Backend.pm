@@ -34,6 +34,10 @@ use POEx::IRC::Backend::Listener;
 use POEx::IRC::Backend::_Util;
 
 
+use constant
+  RUNNING_IN_HELL => $^O =~ /(cygwin|MSWin32)/ ;
+
+
 use namespace::clean;
 use Moo; use MooX::late;
 
@@ -227,8 +231,7 @@ sub _register_controller {
 
 sub _accept_conn {
   ## Accepted connection to a listener.
-  my (undef, $self) = @_[KERNEL, OBJECT];
-  my ($sock, $p_addr, $p_port, $listener_id) = @_[ARG0 .. ARG3];
+  my ($self, $sock, $p_addr, $p_port, $listener_id) = @_[OBJECT, ARG0 .. ARG3];
 
   my ($un_p_addr, $protocol);
   if ($_[STATE] eq '_accept_conn_v6') {
@@ -236,12 +239,12 @@ sub _accept_conn {
     $un_p_addr = $p_addr;
   } else {
     $protocol  = 4;
-    $un_p_addr = get_unpacked_addr( pack_sockaddr_in($p_port, $p_addr),
-      noserv => 1
+    $un_p_addr = get_unpacked_addr(
+      pack_sockaddr_in($p_port, $p_addr), noserv => 1
     );
   }
 
-  my $sock_packed = getsockname $sock;
+  my $sock_packed = getsockname($sock);
   my ($sockaddr, $sockport) = get_unpacked_addr($sock_packed);
   my $listener = $self->listeners->{$listener_id};
 
@@ -287,11 +290,7 @@ sub _accept_conn {
   $self->wheels->{$w_id} = $this_conn;
 
   $this_conn->alarm_id(
-    $poe_kernel->delay_set(
-      '_idle_alarm',
-      $this_conn->idle,
-      $w_id
-    )
+    $poe_kernel->delay_set( _idle_alarm => $this_conn->idle, $w_id )
   );
 
   $poe_kernel->post( $self->controller => 
@@ -300,19 +299,13 @@ sub _accept_conn {
 }
 
 sub _idle_alarm {
-  my ($kernel, $self) = @_[KERNEL, OBJECT];
-  my $w_id = $_[ARG0];
-
+  my ($kernel, $self, $w_id) = @_[KERNEL, OBJECT, ARG0];
   my $this_conn = $self->wheels->{$w_id} || return;
 
-  $kernel->post( $self->controller => 
-    ircsock_connection_idle => $this_conn
-  );
+  $kernel->post( $self->controller => ircsock_connection_idle => $this_conn );
 
   $this_conn->alarm_id(
-    $kernel->delay_set( _idle_alarm => 
-      $this_conn->idle, $w_id
-    )
+    $kernel->delay_set( _idle_alarm => $this_conn->idle, $w_id )
   );
 }
 
@@ -335,17 +328,13 @@ sub _accept_fail {
 sub create_listener {
   my $self = shift;
 
-  $poe_kernel->post( $self->session_id =>
-    create_listener => @_
-  );
+  $poe_kernel->post( $self->session_id => create_listener => @_ );
 
   $self
 }
 
 sub _create_listener {
-  my ($kernel, $self) = @_[KERNEL, OBJECT];
-  my %args = @_[ARG0 .. $#_];
-
+  my ($kernel, $self, %args) = @_[KERNEL, OBJECT, ARG0 .. $#_];
   $args{lc $_} = delete $args{$_} for keys %args;
 
   my $bindaddr  = $args{bindaddr} || '0.0.0.0';
@@ -514,8 +503,8 @@ sub _create_connector {
 
 sub _connector_up {
   ## Created connector socket.
-  my ($kernel, $self) = @_[KERNEL, OBJECT];
-  my ($sock, $p_addr, $p_port, $c_id) = @_[ARG0 .. ARG3];
+  my ($kernel, $self, $sock, $p_addr, $p_port, $c_id)
+    = @_[KERNEL, OBJECT, ARG0 .. ARG3];
 
   my ($protocol, $un_p_addr);
   if ($_[STATE] eq '_connector_up_v6') {
@@ -523,8 +512,8 @@ sub _connector_up {
     $un_p_addr = $p_addr;
   } else {
     $protocol  = 4;
-    $un_p_addr = get_unpacked_addr( pack_sockaddr_in($p_port, $p_addr),
-      noserv => 1
+    $un_p_addr = get_unpacked_addr(
+      pack_sockaddr_in($p_port, $p_addr), noserv => 1
     );
   }
 
@@ -712,7 +701,7 @@ sub _disconnected {
   $poe_kernel->alarm_remove( $this_conn->alarm_id )
     if $this_conn->has_alarm_id;
 
-  if ($^O =~ /(cygwin|MSWin32)/) {
+  if (RUNNING_IN_HELL) {
     $this_conn->wheel->shutdown_input;
     $this_conn->wheel->shutdown_output;
   }
