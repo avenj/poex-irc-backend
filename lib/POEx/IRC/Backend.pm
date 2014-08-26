@@ -583,11 +583,9 @@ sub _connector_failed {
 
 ## _ircsock_* handlers talk to endpoints via listeners/connectors
 sub _ircsock_input {
-  ## Input handler.
   my ($kernel, $self) = @_[KERNEL, OBJECT];
   my ($input, $w_id)  = @_[ARG0, ARG1];
 
-  ## Retrieve Backend::Connect
   my $this_conn = $self->wheels->{$w_id};
 
   ## Adjust last seen and idle alarm
@@ -597,7 +595,6 @@ sub _ircsock_input {
 
   ## FIXME configurable raw events?
 
-  ## Send ircsock_input to controller/dispatcher
   $kernel->post( $self->controller => 
     ircsock_input => $this_conn, ircmsg(%$input)
   );
@@ -618,23 +615,17 @@ sub _ircsock_error {
 
 sub _ircsock_flushed {
   ## Socket's been flushed; we may have something to do.
-  my (undef, $self, $w_id) = @_[KERNEL, OBJECT, ARG0];
+  my ($self, $w_id) = @_[OBJECT, ARG0];
 
   my $this_conn = $self->wheels->{$w_id} || return;
 
   if ($this_conn->is_disconnecting) {
-    $self->_disconnected(
-      $w_id,
-      $this_conn->is_disconnecting
-    );
-    return
+    return $self->_disconnected( $w_id, $this_conn->is_disconnecting )
   }
 
   if ($this_conn->is_pending_compress) {
-    $self->set_compressed_link_now($w_id);
-    return
+    return $self->set_compressed_link_now($w_id)
   }
-
 }
 
 sub _send {
@@ -691,7 +682,7 @@ sub _disconnected {
   my $this_conn = delete $self->wheels->{$w_id};
 
   ## Idle timer cleanup
-  $poe_kernel->alarm_remove( $this_conn->alarm_id )
+  $poe_kernel->alarm_remove( $this_conn->alarm_id ) 
     if $this_conn->has_alarm_id;
 
   if (RUNNING_IN_HELL) {
@@ -713,13 +704,15 @@ sub _disconnected {
 
 sub set_compressed_link {
   my ($self, $w_id) = @_;
-
-  require POE::Filter::Zlib::Stream;
-
   confess "set_compressed_link() needs a wheel ID"
     unless defined $w_id;
 
-  return unless $self->wheels->{$w_id};
+  require POE::Filter::Zlib::Stream;
+
+  unless ($self->wheels->{$w_id}) {
+    carp "set_compressed_link for nonexistant wheel '$w_id'";
+    return
+  }
 
   $self->wheels->{$w_id}->is_pending_compress(1);
 
@@ -728,14 +721,16 @@ sub set_compressed_link {
 
 sub set_compressed_link_now {
   my ($self, $w_id) = @_;
-
-  require POE::Filter::Zlib::Stream;
-
   confess "set_compressed_link() needs a wheel ID"
     unless defined $w_id;
  
-  my $this_conn;
-  return unless $this_conn = $self->wheels->{$w_id};
+  my $this_conn = $self->wheels->{$w_id};
+  unless (defined $this_conn) {
+    carp "set_compressed_link_now for nonexistant wheel '$w_id'";
+    return
+  }
+
+  require POE::Filter::Zlib::Stream;
 
   $this_conn->wheel->get_input_filter->unshift(
     POE::Filter::Zlib::Stream->new,
@@ -753,17 +748,17 @@ sub set_compressed_link_now {
 
 sub unset_compressed_link {
   my ($self, $w_id) = @_;
-
   confess "unset_compressed_link() needs a wheel ID"
     unless defined $w_id;
 
-  my $this_conn;
-  return unless $this_conn = $self->wheels->{$w_id};
-
-  return unless $this_conn->compressed;
+  my $this_conn = $self->wheels->{$w_id};
+  unless (defined $this_conn && $this_conn->compressed) {
+    carp 
+      "unset_compressed_link on uncompressed or nonexistant wheel '$w_id'";
+    return
+  }
 
   $this_conn->wheel->get_input_filter->shift;
-
   $this_conn->set_compressed(0);
 
   $self
