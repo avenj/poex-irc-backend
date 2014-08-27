@@ -33,9 +33,25 @@ use POEx::IRC::Backend::Connector;
 use POEx::IRC::Backend::Listener;
 use POEx::IRC::Backend::_Util;
 
+my %_can_haz;
 
-use constant
-  RUNNING_IN_HELL => ($^O =~ /(cygwin|MSWin32)/) ;
+sub has_ssl_support {
+  unless (defined $_can_haz{ssl}) {
+    try {; require POE::Component::SSLify; $_can_haz{ssl} = 1 }
+      catch {; $_can_haz{ssl} = 0 };
+  }
+  $_can_haz{ssl}
+}
+
+sub has_zlib_support {
+  unless (defined $_can_haz{zlib}) {
+    try {; require POE::Filter::Zlib::Stream; $_can_haz{zlib} = 1 }
+      catch {; $_can_haz{zlib} = 0 };
+  }
+  $_can_haz{zlib}
+}
+
+sub RUNNING_IN_HELL () { $^O =~ /(cygwin|MSWin32)/ }
 
 
 use namespace::clean;
@@ -174,7 +190,7 @@ sub spawn {
 
     my $ssl_err;
     try {
-      require POE::Component::SSLify;
+      die "Failed to load POE::Component::SSLify" unless has_ssl_support;
       POE::Component::SSLify::SSLify_Options( @{ $args{ssl_opts} } );
       1
     } catch {
@@ -246,7 +262,7 @@ sub _accept_conn {
 
   if ( $listener->ssl ) {
     try {
-      require POE::Component::SSLify;
+      die "Failed to load POE::Component::SSLify" unless has_ssl_support;
       $sock = POE::Component::SSLify::Client_SSLify($sock)
     } catch {
       warn "Could not SSLify (server) socket: $_\n";
@@ -510,7 +526,7 @@ sub _connector_up {
 
   if ( $ct->ssl ) {
     try {
-      require POE::Component::SSLify;
+      die "Failed to load POE::Component::SSLify" unless has_ssl_support;
       $sock = POE::Component::SSLify::Client_SSLify($sock)
     } catch {
       warn "Could not SSLify (client) socket: $_\n";
@@ -692,7 +708,8 @@ sub set_compressed_link {
   confess "set_compressed_link() needs a wheel ID"
     unless defined $w_id;
 
-  require POE::Filter::Zlib::Stream;
+  confess "Failed to load POE::Filter::Zlib::Stream"
+    unless has_zlib_support;
 
   unless ($self->wheels->{$w_id}) {
     carp "set_compressed_link for nonexistant wheel '$w_id'";
@@ -715,10 +732,11 @@ sub set_compressed_link_now {
     return
   }
 
-  require POE::Filter::Zlib::Stream;
+  confess "Failed to load POE::Filter::Zlib::Stream"
+    unless has_zlib_support;
 
   $this_conn->wheel->get_input_filter->unshift(
-    POE::Filter::Zlib::Stream->new,
+    POE::Filter::Zlib::Stream->new
   );
 
   $this_conn->is_pending_compress(0);
