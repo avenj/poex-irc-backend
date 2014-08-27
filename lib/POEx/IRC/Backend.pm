@@ -35,7 +35,7 @@ use POEx::IRC::Backend::_Util;
 
 
 use constant
-  RUNNING_IN_HELL => $^O =~ /(cygwin|MSWin32)/ ;
+  RUNNING_IN_HELL => ($^O =~ /(cygwin|MSWin32)/) ;
 
 
 use namespace::clean;
@@ -218,7 +218,6 @@ sub _shutdown {
 }
 
 sub _register_controller {
-  ## 'register' event sets a controller session.
   my ($kernel, $self) = @_[KERNEL, OBJECT];
 
   $kernel->refcount_decrement( $self->controller => "IRCD Running" )
@@ -243,9 +242,6 @@ sub _accept_conn {
       pack_sockaddr_in($p_port, $p_addr), noserv => 1
     );
   }
-
-  my $sock_packed = getsockname($sock);
-  my ($sockaddr, $sockport) = get_unpacked_addr($sock_packed);
   my $listener = $self->listeners->{$listener_id};
 
   if ( $listener->ssl ) {
@@ -271,26 +267,21 @@ sub _accept_conn {
     return
   }
 
-  my $w_id = $wheel->ID;
-
+  my ($sockaddr, $sockport) = get_unpacked_addr( getsockname $sock );
   my $this_conn = POEx::IRC::Backend::Connect->new(
-    protocol => $protocol,
-    wheel    => $wheel,
-
-    peeraddr => $un_p_addr,
-    peerport => $p_port,
-
-    sockaddr => $sockaddr,
-    sockport => $sockport,
-
-    seen => time,
-    idle => $listener->idle,
+    protocol  => $protocol,
+    wheel     => $wheel,
+    peeraddr  => $un_p_addr,
+    peerport  => $p_port,
+    sockaddr  => $sockaddr,
+    sockport  => $sockport,
+    seen      => time,
+    idle      => $listener->idle,
   );
 
-  $self->wheels->{$w_id} = $this_conn;
-
+  $self->wheels->{ $wheel->ID } = $this_conn;
   $this_conn->alarm_id(
-    $poe_kernel->delay_set( _idle_alarm => $this_conn->idle, $w_id )
+    $poe_kernel->delay_set( _idle_alarm => $this_conn->idle, $wheel->ID )
   );
 
   $poe_kernel->post( $self->controller => 
@@ -430,9 +421,7 @@ sub _remove_listener {
 sub create_connector {
   my $self = shift;
 
-  $poe_kernel->post( $self->session_id =>
-    create_connector => @_
-  );
+  $poe_kernel->post( $self->session_id => create_connector => @_ );
 
   $self
 }
@@ -502,7 +491,6 @@ sub _create_connector {
 
 
 sub _connector_up {
-  ## Created connector socket.
   my ($kernel, $self, $sock, $p_addr, $p_port, $c_id)
     = @_[KERNEL, OBJECT, ARG0 .. ARG3];
 
@@ -517,7 +505,7 @@ sub _connector_up {
     );
   }
 
-  ## No need to try to connect out any more; remove from connectors pool
+  ## No need to try to connect out any more; remove from connectors pool:
   my $ct = delete $self->connectors->{$c_id};
 
   if ( $ct->ssl ) {
@@ -545,10 +533,7 @@ sub _connector_up {
     return
   }
 
-  my $w_id = $wheel->ID;
-
-  my $sock_packed = getsockname $sock;
-  my ($sockaddr, $sockport) = get_unpacked_addr($sock_packed);
+  my ($sockaddr, $sockport) = get_unpacked_addr( getsockname $sock );
 
   my $this_conn = POEx::IRC::Backend::Connect->new(
     protocol => $protocol,
@@ -560,7 +545,7 @@ sub _connector_up {
     seen => time,
   );
 
-  $self->wheels->{$w_id} = $this_conn;
+  $self->wheels->{ $wheel->ID } = $this_conn;
 
   $kernel->post( $self->controller => 
     ircsock_connector_open => $this_conn
