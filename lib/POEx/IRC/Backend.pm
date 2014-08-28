@@ -141,67 +141,53 @@ sub has_zlib_support {
 
 
 sub spawn {
-  ## Create our object and session.
-  ## Returns $self
-  ## Sets session_id()
   my ($class, %args) = @_;
+  my $ssl_opts = delete $args{ssl_opts};
+  my $self = blessed $class ? $class : $class->new(%args);
 
-  $args{lc $_} = delete $args{$_} for keys %args;
-
-  my $self = ref $class ? $class : $class->new;
-
-  my $sess_id = POE::Session->create(
+  POE::Session->create(
     object_states => [
       $self => {
-        '_start' => '_start',
-        '_stop'  => '_stop',
+        _start => '_start',
+        _stop  => '_stop',
 
-        'register' => '_register_controller',
-        'shutdown' => '_shutdown',
+        register          => '_register_controller',
+        shutdown          => '_shutdown',
+        create_connector  => '_create_connector',
+        create_listener   => '_create_listener',
+        remove_listener   => '_remove_listener',
+        send              => '_send',
 
-        'send' => '_send',
+        _accept_conn_v4   => '_accept_conn',
+        _accept_conn_v6   => '_accept_conn',
+        _accept_fail      => '_accept_fail',
+        _idle_alarm       => '_idle_alarm',
 
-        'create_listener' => '_create_listener',
-        'remove_listener' => '_remove_listener',
+        _connector_up_v4  => '_connector_up',
+        _connector_up_v6  => '_connector_up',
+        _connector_failed => '_connector_failed',
 
-        '_accept_conn_v4' => '_accept_conn',
-        '_accept_conn_v6' => '_accept_conn',
-        '_accept_fail' => '_accept_fail',
-        '_idle_alarm'  => '_idle_alarm',
-
-        'create_connector'  => '_create_connector',
-        '_connector_up_v4'  => '_connector_up',
-        '_connector_up_v6'  => '_connector_up',
-        '_connector_failed' => '_connector_failed',
-
-        '_ircsock_input'    => '_ircsock_input',
-        '_ircsock_error'    => '_ircsock_error',
-        '_ircsock_flushed'  => '_ircsock_flushed',
+        _ircsock_input    => '_ircsock_input',
+        _ircsock_error    => '_ircsock_error',
+        _ircsock_flushed  => '_ircsock_flushed',
       },
     ],
-  )->ID;
+  ) or confess "Failed to spawn POE::Session";
 
-  confess "Unable to spawn POE::Session and retrieve ID()"
-    unless $sess_id;
-
-  ## ssl_opts => [ ]
   ##  FIXME document that we need a pubkey + cert for server-side ssl
-  if ($args{ssl_opts}) {
-    confess "ssl_opts should be an ARRAY"
-      unless ref $args{ssl_opts} eq 'ARRAY';
-
+  if (defined $ssl_opts) {
+    confess "expected ssl_opts to be an ARRAY but got $ssl_opts"
+      unless ref $ssl_opts eq 'ARRAY';
     my $ssl_err;
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
-      POE::Component::SSLify::SSLify_Options( @{ $args{ssl_opts} } );
+      POE::Component::SSLify::SSLify_Options( @$ssl_opts );
       1
     } catch {
       $ssl_err = $_;
       undef
     } or confess "SSLify failure: $ssl_err";
   }
-
-  ## FIXME add listeners / connectors here if they're configured?
 
   $self
 }
