@@ -1,4 +1,5 @@
 package POEx::IRC::Backend::Role::HasWheel;
+
 use strictures 1;
 
 use Types::Standard -all;
@@ -9,6 +10,7 @@ has wheel_id => (
   isa     => Defined,
   is      => 'ro',
   writer  => '_set_wheel_id',
+  builder => sub { shift->wheel->ID },
 );
 
 has wheel => (
