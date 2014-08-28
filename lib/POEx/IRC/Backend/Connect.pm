@@ -28,7 +28,7 @@ has compressed => (
 has idle => (
   ## Idle delay.
   lazy    => 1,
-  is      => 'rwp',
+  is      => 'ro',
   isa     => StrictNum,
   default => sub { 180 },
 );
