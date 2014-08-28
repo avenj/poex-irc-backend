@@ -33,23 +33,6 @@ use POEx::IRC::Backend::Connector;
 use POEx::IRC::Backend::Listener;
 use POEx::IRC::Backend::_Util;
 
-my %_can_haz;
-
-sub has_ssl_support {
-  unless (defined $_can_haz{ssl}) {
-    try {; require POE::Component::SSLify; $_can_haz{ssl} = 1 }
-      catch {; $_can_haz{ssl} = 0 };
-  }
-  $_can_haz{ssl}
-}
-
-sub has_zlib_support {
-  unless (defined $_can_haz{zlib}) {
-    try {; require POE::Filter::Zlib::Stream; $_can_haz{zlib} = 1 }
-      catch {; $_can_haz{zlib} = 0 };
-  }
-  $_can_haz{zlib}
-}
 
 sub RUNNING_IN_HELL () { $^O =~ /(cygwin|MSWin32)/ }
 
@@ -138,6 +121,25 @@ has wheels => (
 );
 
 
+my %_can_haz;
+
+sub has_ssl_support {
+  unless (defined $_can_haz{ssl}) {
+    try {; require POE::Component::SSLify; $_can_haz{ssl} = 1 }
+      catch {; $_can_haz{ssl} = 0 };
+  }
+  $_can_haz{ssl}
+}
+
+sub has_zlib_support {
+  unless (defined $_can_haz{zlib}) {
+    try {; require POE::Filter::Zlib::Stream; $_can_haz{zlib} = 1 }
+      catch {; $_can_haz{zlib} = 0 };
+  }
+  $_can_haz{zlib}
+}
+
+
 sub spawn {
   ## Create our object and session.
   ## Returns $self
@@ -190,7 +192,7 @@ sub spawn {
 
     my $ssl_err;
     try {
-      die "Failed to load POE::Component::SSLify" unless has_ssl_support;
+      die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
       POE::Component::SSLify::SSLify_Options( @{ $args{ssl_opts} } );
       1
     } catch {
@@ -203,7 +205,6 @@ sub spawn {
 
   $self
 }
-
 
 sub _start {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
@@ -262,7 +263,7 @@ sub _accept_conn {
 
   if ( $listener->ssl ) {
     try {
-      die "Failed to load POE::Component::SSLify" unless has_ssl_support;
+      die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
       $sock = POE::Component::SSLify::Client_SSLify($sock)
     } catch {
       warn "Could not SSLify (server) socket: $_\n";
@@ -526,7 +527,7 @@ sub _connector_up {
 
   if ( $ct->ssl ) {
     try {
-      die "Failed to load POE::Component::SSLify" unless has_ssl_support;
+      die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
       $sock = POE::Component::SSLify::Client_SSLify($sock)
     } catch {
       warn "Could not SSLify (client) socket: $_\n";
@@ -709,7 +710,7 @@ sub set_compressed_link {
     unless defined $w_id;
 
   confess "Failed to load POE::Filter::Zlib::Stream"
-    unless has_zlib_support;
+    unless $self->has_zlib_support;
 
   unless ($self->wheels->{$w_id}) {
     carp "set_compressed_link for nonexistant wheel '$w_id'";
@@ -733,7 +734,7 @@ sub set_compressed_link_now {
   }
 
   confess "Failed to load POE::Filter::Zlib::Stream"
-    unless has_zlib_support;
+    unless $self->has_zlib_support;
 
   $this_conn->wheel->get_input_filter->unshift(
     POE::Filter::Zlib::Stream->new
@@ -990,6 +991,14 @@ sending if this behavior is unwanted:
     );
   }
 
+=head3 has_ssl_support
+
+Returns true if L<POE::Component::SSLify> was successfully loaded.
+
+=head3 has_zlib_support
+
+Returns true if L<POE::Filter::Zlib::Stream> was successfully loaded.
+
 =head3 set_compressed_link
 
   $backend->set_compressed_link( $conn_id );
@@ -998,12 +1007,16 @@ Mark a specified connection wheel ID as pending compression;
 L<POE::Filter::Zlib::Stream> will be added to the filter stack when the 
 next flush event arrives.
 
+This method will die unless L</has_zlib_support> is true.
+
 =head3 set_compressed_link_now
 
   $backend->set_compressed_link_now( $conn_id );
 
 Add a L<POE::Filter::Zlib::Stream> to the connection's filter stack 
 immediately, rather than upon next flush event.
+
+This method will die unless L</has_zlib_support> is true.
 
 =head3 unset_compressed_link
 
