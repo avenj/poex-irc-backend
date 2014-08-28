@@ -36,10 +36,14 @@ POE::Session->create(
 
 sub _start {
   $_[HEAP] = new_ok( 'POEx::IRC::Backend' );
+
   my ($k, $backend) = @_[KERNEL, HEAP];
+
   $k->delay( shutdown => 30 => 'timeout' );
+
   $backend->spawn;
   $k->post( $backend->session_id, 'register' );
+
   $backend->create_listener(
     protocol => 4,
     bindaddr => '127.0.0.1',

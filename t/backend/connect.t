@@ -10,48 +10,96 @@ use POEx::IRC::Backend::Connect;
 }
 
 my $conn = POEx::IRC::Backend::Connect->new(
-  wheel => POE::Wheel->new,
+  wheel     => POE::Wheel->new,
+  protocol  => 4,
+  peeraddr  => 'foo',
+  peerport  => '123',
+  sockaddr  => 'bar',
+  sockport  => '456',
 );
 
 ok $conn->does('POEx::IRC::Backend::Role::HasWheel'),
   'consumes POEx::IRC::Backend::Role::HasWheel';
 
 # (rw) alarm_id
+ok !$conn->has_alarm_id, 'has_alarm_id ok';
+cmp_ok $conn->alarm_id, '==', 0, 'default alarm_id ok';
+$conn->alarm_id(1);
+cmp_ok $conn->alarm_id, '==', 1, 'rw alarm_id ok';
 
-# (rw) is_client
+# (rw) is_client [Bool]
+ok !$conn->is_client, 'default is_client ok';
+$conn->is_client(1);
+ok $conn->is_client, 'rw is_client ok';
+eval {; $conn->is_client([]) };
+ok $@, 'bad type is_client dies ok';
 
-# (rw) is_peer
+# (rw) is_peer [Bool]
+ok !$conn->is_peer, 'default is_peer ok';
+$conn->is_peer(1);
+ok $conn->is_peer, 'rw is_peer ok';
+eval {; $conn->is_peer([]) };
+ok $@, 'bad type is_peer dies ok';
 
 # (rw) is_disconnecting
+ok !$conn->is_disconnecting, 'default is_disconnecting ok';
+$conn->is_disconnecting(1);
+ok $conn->is_disconnecting, 'rw is_disconnecting ok';
+$conn->is_disconnecting('foo');
+cmp_ok $conn->is_disconnecting, 'eq', 'foo', 'str is_disconnecting ok';
 
 # (rw) is_pending_compress
+ok !$conn->is_pending_compress, 'default is_pending_compress ok';
+$conn->is_pending_compress(1);
+ok $conn->is_pending_compress, 'rw is_pending_compress ok';
+eval {; $conn->is_pending_compress([]) };
+ok $@, 'bad type is_pending_compress dies ok';
 
 # idle
+cmp_ok $conn->idle, '==', 180, 'default idle ok';
 
 # compressed / set_compressed
-
-# peeraddr
-
-# peerport
+ok !$conn->compressed, 'default compressed ok';
+$conn->set_compressed(1);
+ok $conn->compressed, 'set_compressed ok';
 
 # (rw) ping_pending
+# FIXME
 
 # protocol
+cmp_ok $conn->protocol, '==', 4, 'protocol ok';
+# FIXME type check tests
 
 # (rw) seen
+cmp_ok $conn->seen, '==', 0, 'default seen ok';
+$conn->seen(123);
+cmp_ok $conn->seen, '==', 123, 'rw seen ok';
 
-# sockaddr
+# peeraddr / set_peeraddr
+# FIXME
 
-# sockport
+# peerport / set_peerport
+# FIXME
+
+# sockaddr / set_sockaddr
+# FIXME
+
+# sockport / set_sockport
+# FIXME
 
 # peeraddr required
+# FIXME
 
 # peerport required
+# FIXME
 
 # protocol required
+# FIXME
 
 # sockaddr required
+# FIXME
 
 # sockport required
+# FIXME
 
 done_testing
