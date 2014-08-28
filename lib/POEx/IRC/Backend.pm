@@ -790,43 +790,54 @@ POEx::IRC::Backend - IRC client or server backend
   use POE;
   use POEx::IRC::Backend;
 
-  ## Spawn a Backend and register as the controlling session:
-  my $backend = POEx::IRC::Backend->spawn;
-  $poe_kernel->post( $backend->session_id, 'register' );
+  POE::Session->create(
+    package_states => [
+      main => [ qw/
+        _start
+        ircsock_registered
+        ircsock_input
+      / ],
+    ],
+  );
+
+  sub _start {
+    # Spawn a Backend and register as the controlling session:
+    my $backend = POEx::IRC::Backend->spawn;
+    $_[HEAP]->{backend} = $backend;
+    $_[KERNEL]->post( $backend->session_id, 'register' );
+  }
 
   sub ircsock_registered {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
+    my $backend = $_[HEAP]->{backend};
 
-    ## Listen for incoming IRC traffic:
+    # Listen for incoming IRC traffic:
     $backend->create_listener(
       bindaddr => $addr,
       port     => $port,
     );
 
-    ## Connect to a remote endpoint:
+    # Connect to a remote endpoint:
     $backend->create_connector(
       remoteaddr => $remote,
       remoteport => $remoteport,
-      ## Optional:
+      # Optional:
       bindaddr => $bindaddr,
       ipv6     => 1,
       ssl      => 1,
     );
   }
 
-  ## Handle and dispatch incoming IRC events:
+  # Handle and dispatch incoming IRC events:
   sub ircsock_input {
-    my ($kernel, $self) = @_[KERNEL, OBJECT];
-
-    ## POEx::IRC::Backend::Connect obj:
+    # POEx::IRC::Backend::Connect obj:
     my $this_conn = $_[ARG0];
 
-    ## IRC::Message::Object obj:
+    # IRC::Message::Object obj:
     my $input_obj = $_[ARG1];
 
     my $cmd = $input_obj->command;
 
-    ## ... dispatch, etc ...
+    # ... dispatch, etc ...
   }
 
 =head1 DESCRIPTION
