@@ -842,16 +842,16 @@ POEx::IRC::Backend - IRC client or server backend
 
 =head1 DESCRIPTION
 
-A L<POE> IRC backend socket handler using L<POE::Filter::IRCv3> and
-L<IRC::Toolkit>.
-
-This can be used by client or server libraries to speak IRC protocol via
+A L<POE> IRC socket handler that can be used (by client or server
+implementations) to speak the IRC protocol to endpoints via
 L<IRC::Message::Object> objects.
 
-This is a basic low-level interface to IRC connections; see
+Inspired by L<POE::Component::Server::IRC::Backend> & L<POE::Component::IRC>.
+
+This is a very low-level interface to IRC sockets. See
 L<POEx::IRC::Client::Lite> for an experimental IRC client library using this
-backend or try L<POE::Component::IRC> for a mature, fully-featured IRC client
-library.
+backend (and the L</"SEE ALSO"> section of this documentation for related
+tools).
 
 =head2 Attributes
 
@@ -1170,16 +1170,23 @@ Zlib and SSL are mostly untested.
 
 =head1 SEE ALSO
 
-L<IRC::Toolkit>
+L<POEx::IRC::Client::Lite> for an experimental IRC client library using this
+backend.
 
-L<POE::Filter::IRCv3>
+L<POE::Filter::IRCv3> and L<IRC::Message::Object> for documentation regarding
+IRC message parsing.
+
+L<IRC::Toolkit> for an extensive set of IRC-related utilities.
+
+L<POE::Component::IRC> if you're looking for a mature, fully-featured IRC
+client library.
 
 =head1 AUTHOR
 
 Jon Portnoy <avenj@cobaltirc.org>
 
 Inspiration derived from L<POE::Component::Server::IRC::Backend> and
-L<POE::Component::IRC> by BINGOS, HINRIK et al
+L<POE::Component::IRC> by BINGOS, HINRIK et al.
 
 =cut
 
