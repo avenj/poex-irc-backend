@@ -39,6 +39,24 @@ has backend => (
 );
 
 
+has responses => (
+  is          => 'ro',
+  builder     => sub {
+    +{
+
+      helloserver => ircmsg(
+        command => 'helloclient',
+        params  => [ 'hello', 'client' ],
+      ),
+
+      byeserver => +{
+        command => 'byeclient',
+        params  => [ 'bye', 'client' ],
+      },
+
+    }
+);
+
 sub BUILD {
   POE::Session->create(
     object_states => [
@@ -76,23 +94,13 @@ sub ircsock_listener_created {
   $kernel->post( $self->controller => 'server_ready', $listener );
 }
 
-my $response = +{
-  helloserver => ircmsg(
-    command => 'helloclient',
-    params  => [ 'hello', 'client' ],
-  ),
 
-  byeserver => +{
-    command => 'byeclient',
-    params  => [ 'bye', 'client' ],
-  },
-};
 
 sub ircsock_input {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
   my ($conn, $event)  = @_[ARG0 .. $#_];
 
-  # FIXME ->record_event, issue responses out of static set
+  # FIXME ->record_event, issue responses out of ->responses set
 }
 
 1;
