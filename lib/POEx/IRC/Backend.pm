@@ -640,8 +640,10 @@ sub send {
     "send() takes a HASH or IRC::Message::Object and a list of connection IDs"
     unless ref $out eq 'HASH' and @ids;
 
-  for my $id (grep {; exists $self->wheels->{$_} } @ids) {
-    $self->wheels->{$id}->wheel->put( $out );
+  TARGET: for my $target (@ids) {
+    # FIXME tests/docs wrt passing in Connect objs
+    $target = $target->wheel_id if blessed $target;
+    ($self->wheels->{$target} || next TARGET)->wheel->put($out)
   }
 
   $self
