@@ -764,7 +764,7 @@ unless caller; 1;
 
 =pod
 
-=for Pod::Coverage has_\w+
+=for Pod::Coverage has_\w+ RUNNING_IN_HELL
 
 =head1 NAME
 

@@ -1,5 +1,9 @@
 package POEx::IRC::Backend::_Util;
 
+=for Pod::Coverage .*
+
+=cut
+
 use strictures 1;
 use Carp;
 
