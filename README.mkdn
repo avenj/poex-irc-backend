@@ -7,70 +7,76 @@ POEx::IRC::Backend - IRC client or server backend
     use POE;
     use POEx::IRC::Backend;
 
-    ## Spawn a Backend and register as the controlling session:
-    my $backend = POEx::IRC::Backend->spawn;
-    $poe_kernel->post( $backend->session_id, 'register' );
-
-    sub ircsock_registered {
-      my ($kernel, $self) = @_[KERNEL, OBJECT];
-
-    ## Listen for incoming IRC traffic:
-    $backend->create_listener(
-      bindaddr => $addr,
-      port     => $port,
+    POE::Session->create(
+      package_states => [
+        main => [ qw/
+          _start
+          ircsock_registered
+          ircsock_input
+        / ],
+      ],
     );
 
-      ## Connect to a remote endpoint:
+    sub _start {
+      # Spawn a Backend and register as the controlling session:
+      my $backend = POEx::IRC::Backend->spawn;
+      $_[HEAP]->{backend} = $backend;
+      $_[KERNEL]->post( $backend->session_id, 'register' );
+    }
+
+    sub ircsock_registered {
+      my $backend = $_[HEAP]->{backend};
+
+      # Listen for incoming IRC traffic:
+      $backend->create_listener(
+        bindaddr => $addr,
+        port     => $port,
+      );
+
+      # Connect to a remote endpoint:
       $backend->create_connector(
         remoteaddr => $remote,
         remoteport => $remoteport,
-        ## Optional:
+        # Optional:
         bindaddr => $bindaddr,
         ipv6     => 1,
         ssl      => 1,
       );
     }
 
-    ## Handle and dispatch incoming IRC events:
+    # Handle and dispatch incoming IRC events:
     sub ircsock_input {
-      my ($kernel, $self) = @_[KERNEL, OBJECT];
+      # POEx::IRC::Backend::Connect obj:
+      my $this_conn = $_[ARG0];
 
-    ## POEx::IRC::Backend::Connect obj:
-    my $this_conn = $_[ARG0];
+      # IRC::Message::Object obj:
+      my $input_obj = $_[ARG1];
 
-    ## IRC::Message::Object obj:
-    my $input_obj = $_[ARG1];
+      my $cmd = $input_obj->command;
 
-    my $cmd = $input_obj->command;
-
-      ## ... dispatch, etc ...
+      # ... dispatch, etc ...
     }
 
 # DESCRIPTION
 
-A [POE](http://search.cpan.org/perldoc?POE) IRC backend socket handler using [POE::Filter::IRCv3](http://search.cpan.org/perldoc?POE::Filter::IRCv3) and
-[IRC::Toolkit](http://search.cpan.org/perldoc?IRC::Toolkit).
+A [POE](https://metacpan.org/pod/POE) IRC socket handler that can be used (by client or server
+implementations) to speak the IRC protocol to endpoints via
+[IRC::Message::Object](https://metacpan.org/pod/IRC::Message::Object) objects.
 
-This can be used by client or server libraries to speak IRC protocol via
-[IRC::Message::Object](http://search.cpan.org/perldoc?IRC::Message::Object) objects.
+Inspired by [POE::Component::Server::IRC::Backend](https://metacpan.org/pod/POE::Component::Server::IRC::Backend) & [POE::Component::IRC](https://metacpan.org/pod/POE::Component::IRC).
 
-This is a basic low-level interface to IRC connections; 
-see [POEx::IRC::Client::Lite](http://search.cpan.org/perldoc?POEx::IRC::Client::Lite) for an experimental IRC client library using
-this backend.
-
-This module is part of a set of IRC building blocks that have been 
-split out of a much larger project; it is also early 'alpha-quality' software.
-
-Take a gander at [POE::Component::IRC](http://search.cpan.org/perldoc?POE::Component::IRC) for a mature, fully-featured IRC
-client library.
+This is a very low-level interface to IRC sockets. See
+[POEx::IRC::Client::Lite](https://metacpan.org/pod/POEx::IRC::Client::Lite) for an experimental IRC client library using this
+backend (and the ["SEE ALSO"](#see-also) section of this documentation for related
+tools).
 
 ## Attributes
 
 ### controller
 
-Retrieve the [POE::Session](http://search.cpan.org/perldoc?POE::Session) ID for the backend's registered controller.
+Retrieve the [POE::Session](https://metacpan.org/pod/POE::Session) ID for the backend's registered controller.
 
-Predicate: __has\_controller__
+Predicate: **has\_controller**
 
 ### connectors
 
@@ -78,12 +84,12 @@ A HASH of active Connector objects, keyed on their wheel ID.
 
 ### filter
 
-A [POE::Filter::Stackable](http://search.cpan.org/perldoc?POE::Filter::Stackable) instance consisting of the current ["filter\_irc"](#filter\_irc)
-stacked with ["filter\_line"](#filter\_line) (at the time the attribute is built).
+A [POE::Filter::Stackable](https://metacpan.org/pod/POE::Filter::Stackable) instance consisting of the current ["filter\_irc"](#filter_irc)
+stacked with ["filter\_line"](#filter_line) (at the time the attribute is built).
 
 ### filter\_irc
 
-A [POE::Filter::IRCv3](http://search.cpan.org/perldoc?POE::Filter::IRCv3) instance with __colonify__ enabled, by default.
+A [POE::Filter::IRCv3](https://metacpan.org/pod/POE::Filter::IRCv3) instance with **colonify** enabled, by default.
 
 A client-side Backend will probably want a non-colonifying filter:
 
@@ -94,7 +100,7 @@ A client-side Backend will probably want a non-colonifying filter:
 
 ### filter\_line
 
-A [POE::Filter::Line](http://search.cpan.org/perldoc?POE::Filter::Line) instance.
+A [POE::Filter::Line](https://metacpan.org/pod/POE::Filter::Line) instance.
 
 ### listeners
 
@@ -108,8 +114,6 @@ Returns the backend's session ID.
 
 HASH of actively connected wheels, keyed on their wheel ID.
 
-
-
 ## Methods
 
 ### spawn
@@ -122,7 +126,7 @@ HASH of actively connected wheels, keyed on their wheel ID.
       ],
     );
 
-Creates the backend's [POE::Session](http://search.cpan.org/perldoc?POE::Session).
+Creates the backend's [POE::Session](https://metacpan.org/pod/POE::Session).
 
 ### create\_connector
 
@@ -135,8 +139,8 @@ Creates the backend's [POE::Session](http://search.cpan.org/perldoc?POE::Session
       ssl  => 1,
     );
 
-Attempts to create a [POEx::IRC::Backend::Connector](http://search.cpan.org/perldoc?POEx::IRC::Backend::Connector) that 
-holds a [POE::Wheel::SocketFactory](http://search.cpan.org/perldoc?POE::Wheel::SocketFactory) connector wheel; connectors will 
+Attempts to create a [POEx::IRC::Backend::Connector](https://metacpan.org/pod/POEx::IRC::Backend::Connector) that 
+holds a [POE::Wheel::SocketFactory](https://metacpan.org/pod/POE::Wheel::SocketFactory) connector wheel; connectors will 
 attempt to establish an outgoing connection immediately.
 
 ### create\_listener
@@ -150,8 +154,8 @@ attempt to establish an outgoing connection immediately.
       idle     => $seconds,
     );
 
-Attempts to create a [POEx::IRC::Backend::Listener](http://search.cpan.org/perldoc?POEx::IRC::Backend::Listener) 
-that holds a [POE::Wheel::SocketFactory](http://search.cpan.org/perldoc?POE::Wheel::SocketFactory) listener wheel.
+Attempts to create a [POEx::IRC::Backend::Listener](https://metacpan.org/pod/POEx::IRC::Backend::Listener) 
+that holds a [POE::Wheel::SocketFactory](https://metacpan.org/pod/POE::Wheel::SocketFactory) listener wheel.
 
 ### remove\_listener
 
@@ -165,8 +169,8 @@ that holds a [POE::Wheel::SocketFactory](http://search.cpan.org/perldoc?POE::Whe
       port => 6667,
     );
 
-Removes a listener and clears its __wheel__ attribute; the socket shuts down
-when the [POE::Wheel::SocketFactory](http://search.cpan.org/perldoc?POE::Wheel::SocketFactory) wheel goes out of scope.
+Removes a listener and clears its **wheel** attribute; the socket shuts down
+when the [POE::Wheel::SocketFactory](https://metacpan.org/pod/POE::Wheel::SocketFactory) wheel goes out of scope.
 
 ### disconnect
 
@@ -191,36 +195,62 @@ disconnection.
       command => 'PRIVMSG',
       params  => [ $chan, $string ],
     );
-    $backend->send( $msg, $connect_id );
+    $backend->send( $msg, $connect_obj );
 
-Feeds [POE::Filter::IRCv3](http://search.cpan.org/perldoc?POE::Filter::IRCv3) and sends the resultant raw IRC 
-line to the specified connection wheel ID(s).
+Feeds [POE::Filter::IRCv3](https://metacpan.org/pod/POE::Filter::IRCv3) and sends the resultant raw IRC 
+line to the specified connection wheel ID(s) or [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect)
+object(s).
 
-Accepts either an [IRC::Message::Object](http://search.cpan.org/perldoc?IRC::Message::Object) or a HASH compatible with
-[POE::Filter::IRCv3](http://search.cpan.org/perldoc?POE::Filter::IRCv3) -- look there for details.
+Accepts either an [IRC::Message::Object](https://metacpan.org/pod/IRC::Message::Object) or a HASH compatible with
+[POE::Filter::IRCv3](https://metacpan.org/pod/POE::Filter::IRCv3) -- look there for details.
+
+Note that unroutable (target connection IDs with no matching live
+wheel) messages are silently dropped. You can check ["wheels"](#wheels) yourself before
+sending if this behavior is unwanted:
+
+    for my $target (@connect_ids) {
+      unless (exists $backend->wheels->{$target}) {
+        warn "Cannot send to nonexistant target '$target'";
+        next
+      }
+      $backend->send(
+          { prefix => $prefix, params => [ @params ], command => $cmd },
+          $target
+      );
+    }
+
+### has\_ssl\_support
+
+Returns true if [POE::Component::SSLify](https://metacpan.org/pod/POE::Component::SSLify) was successfully loaded.
+
+### has\_zlib\_support
+
+Returns true if [POE::Filter::Zlib::Stream](https://metacpan.org/pod/POE::Filter::Zlib::Stream) was successfully loaded.
 
 ### set\_compressed\_link
 
     $backend->set_compressed_link( $conn_id );
 
 Mark a specified connection wheel ID as pending compression; 
-[POE::Filter::Zlib::Stream](http://search.cpan.org/perldoc?POE::Filter::Zlib::Stream) will be added to the filter stack when the 
+[POE::Filter::Zlib::Stream](https://metacpan.org/pod/POE::Filter::Zlib::Stream) will be added to the filter stack when the 
 next flush event arrives.
+
+This method will die unless ["has\_zlib\_support"](#has_zlib_support) is true.
 
 ### set\_compressed\_link\_now
 
     $backend->set_compressed_link_now( $conn_id );
 
-Add a [POE::Filter::Zlib::Stream](http://search.cpan.org/perldoc?POE::Filter::Zlib::Stream) to the connection's filter stack 
+Add a [POE::Filter::Zlib::Stream](https://metacpan.org/pod/POE::Filter::Zlib::Stream) to the connection's filter stack 
 immediately, rather than upon next flush event.
+
+This method will die unless ["has\_zlib\_support"](#has_zlib_support) is true.
 
 ### unset\_compressed\_link
 
     $backend->unset_compressed_link( $conn_id );
 
-Remove [POE::Filter::Zlib::Stream](http://search.cpan.org/perldoc?POE::Filter::Zlib::Stream) from the connection's filter stack.
-
-
+Remove [POE::Filter::Zlib::Stream](https://metacpan.org/pod/POE::Filter::Zlib::Stream) from the connection's filter stack.
 
 ## Received events
 
@@ -236,25 +266,23 @@ events from the backend component.
 
 ### create\_connector
 
-Event interface to _create\_connector_ -- see ["Methods"](#Methods)
+Event interface to _create\_connector_ -- see ["Methods"](#methods)
 
 ### create\_listener
 
-Event interface to _create\_listener_ -- see ["Methods"](#Methods)
+Event interface to _create\_listener_ -- see ["Methods"](#methods)
 
 ### remove\_listener
 
-Event interface to _remove\_listener_ -- see ["Methods"](#Methods)
+Event interface to _remove\_listener_ -- see ["Methods"](#methods)
 
 ### send
 
-Event interface to _/send_ -- see ["Methods"](#Methods)
+Event interface to _/send_ -- see ["Methods"](#methods)
 
 ### shutdown
 
 Disconnect all wheels and clean up.
-
-
 
 ## Dispatched events
 
@@ -265,38 +293,38 @@ These events are dispatched to the controller session; see ["register"](#registe
 Dispatched when a connection wheel has had a compression filter added.
 
 `$_[ARG0]` is the connection's 
-[POEx::IRC::Backend::Connect](http://search.cpan.org/perldoc?POEx::IRC::Backend::Connect)
+[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect)
 
 ### ircsock\_connection\_idle
 
 Dispatched when a connection wheel has had no input for longer than 
-specified idle time (see ["create\_listener"](#create\_listener) regarding idle times).
+specified idle time (see ["create\_listener"](#create_listener) regarding idle times).
 
 `$_[ARG0]` is the connection's 
-[POEx::IRC::Backend::Connect](http://search.cpan.org/perldoc?POEx::IRC::Backend::Connect)
+[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect)
 
 ### ircsock\_connector\_failure
 
 Dispatched when a Connector has failed due to some sort of socket error.
 
 `$_[ARG0]` is the connection's 
-[POEx::IRC::Backend::Connector](http://search.cpan.org/perldoc?POEx::IRC::Backend::Connector) with wheel() cleared.
+[POEx::IRC::Backend::Connector](https://metacpan.org/pod/POEx::IRC::Backend::Connector) with wheel() cleared.
 
 `@_[ARG1 .. ARG3]` contain the socket error details reported by 
-[POE::Wheel::SocketFactory](http://search.cpan.org/perldoc?POE::Wheel::SocketFactory); operation, errno, and errstr, respectively.
+[POE::Wheel::SocketFactory](https://metacpan.org/pod/POE::Wheel::SocketFactory); operation, errno, and errstr, respectively.
 
 ### ircsock\_connector\_open
 
 Dispatched when a Connector has established a connection to a peer.
 
-`$_[ARG0]` is the [POEx::IRC::Backend::Connect](http://search.cpan.org/perldoc?POEx::IRC::Backend::Connect) for the 
+`$_[ARG0]` is the [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect) for the 
 connection.
 
 ### ircsock\_disconnect
 
 Dispatched when a connection wheel has been cleared.
 
-`$_[ARG0]` is the connection's [POEx::IRC::Backend::Connect](http://search.cpan.org/perldoc?POEx::IRC::Backend::Connect) 
+`$_[ARG0]` is the connection's [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect) 
 with wheel() cleared.
 
 ### ircsock\_input
@@ -304,16 +332,16 @@ with wheel() cleared.
 Dispatched when there is some IRC input from a connection wheel.
 
 `$_[ARG0]` is the connection's 
-[POEx::IRC::Backend::Connect](http://search.cpan.org/perldoc?POEx::IRC::Backend::Connect).
+[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect).
 
-`$_[ARG1]` is an [IRC::Message::Object](http://search.cpan.org/perldoc?IRC::Message::Object).
+`$_[ARG1]` is an [IRC::Message::Object](https://metacpan.org/pod/IRC::Message::Object).
 
 ### ircsock\_listener\_created
 
-Dispatched when a [POEx::IRC::Backend::Listener](http://search.cpan.org/perldoc?POEx::IRC::Backend::Listener) has been 
+Dispatched when a [POEx::IRC::Backend::Listener](https://metacpan.org/pod/POEx::IRC::Backend::Listener) has been 
 created.
 
-`$_[ARG0]` is the [POEx::IRC::Backend::Listener](http://search.cpan.org/perldoc?POEx::IRC::Backend::Listener) instance; 
+`$_[ARG0]` is the [POEx::IRC::Backend::Listener](https://metacpan.org/pod/POEx::IRC::Backend::Listener) instance; 
 the instance's port() is altered based on getsockname() details after 
 socket creation and before dispatching this event.
 
@@ -321,24 +349,24 @@ socket creation and before dispatching this event.
 
 Dispatched when a Listener has failed due to some sort of socket error.
 
-`$_[ARG0]` is the [POEx::IRC::Backend::Listener](http://search.cpan.org/perldoc?POEx::IRC::Backend::Listener) object.
+`$_[ARG0]` is the [POEx::IRC::Backend::Listener](https://metacpan.org/pod/POEx::IRC::Backend::Listener) object.
 
 `@_[ARG1 .. ARG3]` contain the socket error details reported by 
-[POE::Wheel::SocketFactory](http://search.cpan.org/perldoc?POE::Wheel::SocketFactory); operation, errno, and errstr, respectively.
+[POE::Wheel::SocketFactory](https://metacpan.org/pod/POE::Wheel::SocketFactory); operation, errno, and errstr, respectively.
 
 ### ircsock\_listener\_open
 
 Dispatched when a listener accepts a connection.
 
-`$_[ARG0]` is the connection's [POEx::IRC::Backend::Connect](http://search.cpan.org/perldoc?POEx::IRC::Backend::Connect)
+`$_[ARG0]` is the connection's [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect)
 
-`$_[ARG1]` is the connection's [POEx::IRC::Backend::Listener](http://search.cpan.org/perldoc?POEx::IRC::Backend::Listener)
+`$_[ARG1]` is the connection's [POEx::IRC::Backend::Listener](https://metacpan.org/pod/POEx::IRC::Backend::Listener)
 
 ### ircsock\_listener\_removed
 
 Dispatched when a Listener has been removed.
 
-`$_[ARG0]` is the [POEx::IRC::Backend::Listener](http://search.cpan.org/perldoc?POEx::IRC::Backend::Listener) object.
+`$_[ARG0]` is the [POEx::IRC::Backend::Listener](https://metacpan.org/pod/POEx::IRC::Backend::Listener) object.
 
 ### ircsock\_registered
 
@@ -357,13 +385,20 @@ Zlib and SSL are mostly untested.
 
 # SEE ALSO
 
-[IRC::Toolkit](http://search.cpan.org/perldoc?IRC::Toolkit)
+[POEx::IRC::Client::Lite](https://metacpan.org/pod/POEx::IRC::Client::Lite) for an experimental IRC client library using this
+backend.
 
-[POE::Filter::IRCv3](http://search.cpan.org/perldoc?POE::Filter::IRCv3)
+[POE::Filter::IRCv3](https://metacpan.org/pod/POE::Filter::IRCv3) and [IRC::Message::Object](https://metacpan.org/pod/IRC::Message::Object) for documentation regarding
+IRC message parsing.
+
+[IRC::Toolkit](https://metacpan.org/pod/IRC::Toolkit) for an extensive set of IRC-related utilities.
+
+[POE::Component::IRC](https://metacpan.org/pod/POE::Component::IRC) if you're looking for a mature, fully-featured IRC
+client library.
 
 # AUTHOR
 
 Jon Portnoy <avenj@cobaltirc.org>
 
-Inspiration derived from [POE::Component::Server::IRC::Backend](http://search.cpan.org/perldoc?POE::Component::Server::IRC::Backend) and
-[POE::Component::IRC](http://search.cpan.org/perldoc?POE::Component::IRC) by BINGOS, HINRIK et al
+Inspiration derived from [POE::Component::Server::IRC::Backend](https://metacpan.org/pod/POE::Component::Server::IRC::Backend) and
+[POE::Component::IRC](https://metacpan.org/pod/POE::Component::IRC) by BINGOS, HINRIK et al.
