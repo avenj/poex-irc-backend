@@ -90,6 +90,7 @@ sub ircsock_connector_open {
 
   isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
 
+  # Testing against Connect wheel_id:
   $backend->send(
     {
       command => 'CONNECTOR',
@@ -98,8 +99,9 @@ sub ircsock_connector_open {
     $conn->wheel_id
   );
 
+  # Testing against Connect obj:
   $backend->send( ircmsg( raw_line => ':test CONNECTOR :testing' ),
-    $conn->wheel_id
+    $conn
   );
 }
 

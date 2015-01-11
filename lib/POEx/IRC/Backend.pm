@@ -967,10 +967,11 @@ disconnection.
     command => 'PRIVMSG',
     params  => [ $chan, $string ],
   );
-  $backend->send( $msg, $connect_id );
+  $backend->send( $msg, $connect_obj );
 
 Feeds L<POE::Filter::IRCv3> and sends the resultant raw IRC 
-line to the specified connection wheel ID(s).
+line to the specified connection wheel ID(s) or L<POEx::IRC::Backend::Connect>
+object(s).
 
 Accepts either an L<IRC::Message::Object> or a HASH compatible with
 L<POE::Filter::IRCv3> -- look there for details.
