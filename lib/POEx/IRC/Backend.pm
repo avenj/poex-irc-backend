@@ -8,8 +8,6 @@ use IRC::Message::Object 'ircmsg';
 use Net::IP::Minimal 'ip_is_ipv6';
 
 use POE qw/
-  Session
-
   Wheel::ReadWrite
   Wheel::SocketFactory
 
@@ -37,7 +35,6 @@ use POEx::IRC::Backend::_Util;
 sub RUNNING_IN_HELL () { $^O =~ /(cygwin|MSWin32)/ }
 
 
-use namespace::clean;
 use Moo; use MooX::late;
 
 
