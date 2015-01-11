@@ -87,9 +87,9 @@ has filter => (
   },
 );
 
-## POEx::IRC::Backend::Listener objs
-## These are listeners for a particular port.
 has listeners => (
+  ## POEx::IRC::Backend::Listener objs
+  ## These are listeners for a particular port.
   init_arg => undef,
   is      => 'ro',
   isa     => HashRef,
@@ -97,9 +97,9 @@ has listeners => (
   default => sub { +{} },
 );
 
-## POEx::IRC::Backend::Connector objs
-## These are outgoing (peer) connectors.
 has connectors => (
+  ## POEx::IRC::Backend::Connector objs
+  ## These are outgoing (peer) connectors.
   init_arg => undef,
   is      => 'ro',
   isa     => HashRef,
@@ -107,9 +107,9 @@ has connectors => (
   default => sub { +{} },
 );
 
-## POEx::IRC::Backend::Connect objs
-## These are our connected wheels.
 has wheels => (
+  ## POEx::IRC::Backend::Connect objs
+  ## These are our connected wheels.
   init_arg => undef,
   is      => 'ro',
   isa     => HashRef,
