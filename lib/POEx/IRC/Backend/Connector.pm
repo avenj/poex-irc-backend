@@ -24,7 +24,7 @@ has bindaddr => (
 
 =head1 NAME
 
-POEx::IRC::Backend::Connector - An outgoing connector
+POEx::IRC::Backend::Connector - An outgoing IRC socket connector
 
 =head1 SYNOPSIS
 

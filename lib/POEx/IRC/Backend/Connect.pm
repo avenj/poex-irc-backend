@@ -125,7 +125,7 @@ has sockport => (
 
 =head1 NAME
 
-POEx::IRC::Backend::Connect - A connectoed socket wheel
+POEx::IRC::Backend::Connect - A connected IRC socket
 
 =head1 SYNOPSIS
 
@@ -144,7 +144,7 @@ attributes:
 =head2 alarm_id
 
 Connected socket wheels normally have a POE alarm ID attached for an idle 
-timer. Writable attribute.
+timer. This attribute is writable.
 
 Predicate: B<has_alarm_id>
 

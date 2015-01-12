@@ -38,7 +38,7 @@ POEx::IRC::Backend::Role::HasWheel
 
 =head1 SYNOPSIS
 
-A Moo::Role for classes that have associated POE::Wheel instances.
+A L<Moo::Role> for classes that have associated POE::Wheel instances.
 
 =head1 DESCRIPTION
 

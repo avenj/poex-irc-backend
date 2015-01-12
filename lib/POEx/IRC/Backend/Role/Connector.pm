@@ -30,11 +30,11 @@ has ssl => (
 
 =head1 NAME
 
-POEx::IRC::Backend::Role::Connector
+POEx::IRC::Backend::Role::Connector - IRC socket connector behavior
 
 =head1 SYNOPSIS
 
-A Moo::Role defining some basic common attributes for listening/connecting
+A L<Moo::Role> defining some basic common attributes for listening/connecting
 sockets.
 
 =head1 DESCRIPTION
