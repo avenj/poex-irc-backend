@@ -1,5 +1,10 @@
 # Changes for POEx::IRC::Backend
 
+0.026001 2015-10-16
+
+  - Preserve a Connector object's "args" attribute in resultant Connect
+    objects
+
 0.025001 2015-01-11
 
   - Support passing Connect objects to ->send (instead of wheel IDs)

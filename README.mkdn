@@ -137,11 +137,17 @@ Creates the backend's [POE::Session](https://metacpan.org/pod/POE::Session).
       bindaddr => $local_addr,
       ipv6 => 1,
       ssl  => 1,
+      ## Unrecognized opts are stored in the Connector's 'args' hash:
+      tag   => 'foo',
     );
 
 Attempts to create a [POEx::IRC::Backend::Connector](https://metacpan.org/pod/POEx::IRC::Backend::Connector) that 
 holds a [POE::Wheel::SocketFactory](https://metacpan.org/pod/POE::Wheel::SocketFactory) connector wheel; connectors will 
 attempt to establish an outgoing connection immediately.
+
+Unrecognized options are stored in the [POEx::IRC::Backend::Connector](https://metacpan.org/pod/POEx::IRC::Backend::Connector)'s
+`args` HASH-type attribute; this is passed to successfully created
+[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect) instances (as of `v0.026`).
 
 ### create\_listener
 
