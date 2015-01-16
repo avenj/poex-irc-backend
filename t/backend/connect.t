@@ -10,6 +10,7 @@ use POEx::IRC::Backend::Connect;
 }
 
 my $conn = POEx::IRC::Backend::Connect->new(
+  args      => +{ tag => 'foo' },
   wheel     => POE::Wheel->new,
   protocol  => 4,
   peeraddr  => 'foo',
@@ -20,6 +21,10 @@ my $conn = POEx::IRC::Backend::Connect->new(
 
 ok $conn->does('POEx::IRC::Backend::Role::HasWheel'),
   'consumes POEx::IRC::Backend::Role::HasWheel';
+
+# (ro) args
+ok $conn->has_args, 'has_args ok';
+is_deeply $conn->args, +{ tag => 'foo' }, 'args ok';
 
 # (rw) alarm_id
 ok !$conn->has_alarm_id, 'has_alarm_id ok';

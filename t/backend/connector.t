@@ -24,6 +24,7 @@ ok $listener->does('POEx::IRC::Backend::Role::Connector');
 ok $listener->has_bindaddr, 'has_bindaddr ok';
 cmp_ok $listener->bindaddr, 'eq', '127.0.0.1', 'bindaddr ok';
 
+ok $listener->has_args, 'has_args ok';
 is_deeply $listener->args, +{ foo => 1 }, 'args ok';
 
 

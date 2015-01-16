@@ -536,6 +536,7 @@ sub _connector_up {
   my ($sockaddr, $sockport) = get_unpacked_addr( getsockname $sock );
 
   my $this_conn = POEx::IRC::Backend::Connect->new(
+    ($ct->has_args ? (args => $ct->args) : () ),
     protocol => $protocol,
     wheel    => $wheel,
     peeraddr => $un_p_addr,
@@ -906,11 +907,17 @@ Creates the backend's L<POE::Session>.
     bindaddr => $local_addr,
     ipv6 => 1,
     ssl  => 1,
+    ## Unrecognized opts are stored in the Connector's 'args' hash:
+    tag   => 'foo',
   );
 
 Attempts to create a L<POEx::IRC::Backend::Connector> that 
 holds a L<POE::Wheel::SocketFactory> connector wheel; connectors will 
 attempt to establish an outgoing connection immediately.
+
+Unrecognized options are stored in the L<POEx::IRC::Backend::Connector>'s
+C<args> HASH-type attribute; this is passed to successfully created
+L<POEx::IRC::Backend::Connect> instances (as of C<v0.026>).
 
 =head3 create_listener
 

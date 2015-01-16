@@ -6,6 +6,13 @@ use Types::Standard -all;
 use Moo; use MooX::late;
 with 'POEx::IRC::Backend::Role::HasWheel';
 
+has args => (
+  lazy      => 1,
+  is        => 'ro',
+  predicate => 1,
+  default   => sub { +{} },
+);
+
 has alarm_id => (
   ## Idle alarm ID.
   lazy      => 1,
@@ -147,6 +154,14 @@ Connected socket wheels normally have a POE alarm ID attached for an idle
 timer. This attribute is writable.
 
 Predicate: B<has_alarm_id>
+
+=head2 args
+
+Arbitrary metadata attached to this connection; by default, any C<args>
+attached to a L<POEx::IRC::Backend::Connector> that spawns a
+L<POEx::IRC::Backend::Connect> are passed along.
+
+Predicate: B<has_args>
 
 =head2 compressed
 

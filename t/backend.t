@@ -76,6 +76,7 @@ sub ircsock_listener_created {
   $backend->create_connector(
     remoteaddr => $listener->addr,
     remoteport => $listener->port,
+    tag        => 'foo',
   );
 }
 
@@ -89,6 +90,8 @@ sub ircsock_connector_open {
   $got->{'got connector_open'}++;
 
   isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
+  is_deeply $conn->args, +{ tag => 'foo' },
+    'args passed along ok';
 
   # Testing against Connect wheel_id:
   $backend->send(
