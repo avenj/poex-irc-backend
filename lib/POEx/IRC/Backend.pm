@@ -345,6 +345,9 @@ sub _create_listener {
 
   my $id = $wheel->ID;
 
+  # FIXME probably useful to have the same extra args behavior
+  #  as Connectors, so resultant Connects could easily be tied to their
+  #  originating Listener ->
   my $listener = POEx::IRC::Backend::Listener->new(
     protocol => $protocol,
     wheel => $wheel,
@@ -650,6 +653,7 @@ sub send {
 sub disconnect {
   ## Mark a wheel for disconnection.
   my ($self, $w_id, $str) = @_;
+  $w_id = $w_id->wheel_id if blessed $w_id;
 
   confess "disconnect() needs an (extant) wheel ID"
     unless defined $w_id
@@ -952,8 +956,8 @@ when the L<POE::Wheel::SocketFactory> wheel goes out of scope.
 
   $backend->disconnect($wheel_id, $disconnect_string);
 
-Given a connection's wheel ID, mark the specified wheel for 
-disconnection.
+Given a L<POEx::IRC::Backend::Connect> or its C<wheel_id>, mark the specified
+wheel for disconnection.
 
 =head3 send
 
