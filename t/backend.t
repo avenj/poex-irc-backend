@@ -153,7 +153,7 @@ sub ircsock_input {
     $got->{'got ircsock_input'}++;
   }
 
-  ## FIXME test ->disconnect() behavior
+  ## FIXME test ->disconnect() behavior with both blessed wheel & ID
 
   if ($got->{'got ircsock_input'} == $expected->{'got ircsock_input'}) {
     ## Call for a listener removal to test listener_removed
