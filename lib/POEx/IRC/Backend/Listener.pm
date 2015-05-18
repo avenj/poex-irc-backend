@@ -19,7 +19,7 @@ has idle  => (
 
 =head1 NAME
 
-POEx::IRC::Backend::Listener - An incoming connection Listener
+POEx::IRC::Backend::Listener - An incoming IRC socket Listener
 
 =head1 SYNOPSIS
 
