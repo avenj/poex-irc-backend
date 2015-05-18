@@ -182,8 +182,8 @@ when the [POE::Wheel::SocketFactory](https://metacpan.org/pod/POE::Wheel::Socket
 
     $backend->disconnect($wheel_id, $disconnect_string);
 
-Given a connection's wheel ID, mark the specified wheel for 
-disconnection.
+Given a [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect) or its `wheel_id`, mark the specified
+wheel for disconnection.
 
 ### send
 

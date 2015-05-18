@@ -1,6 +1,10 @@
 # Changes for POEx::IRC::Backend
 
-0.026001 2015-10-16
+0.027001 2015-05-18
+
+  - Allow passing a Connect object to ->disconnect
+
+0.026001 2015-01-16
 
   - Preserve a Connector object's "args" attribute in resultant Connect
     objects
