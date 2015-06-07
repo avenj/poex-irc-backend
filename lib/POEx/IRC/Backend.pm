@@ -58,9 +58,7 @@ has filter_irc => (
   lazy    => 1,
   isa     => InstanceOf['POE::Filter'],
   is      => 'ro',
-  default => sub {
-    POE::Filter::IRCv3->new(colonify => 1)
-  },
+  default => sub { POE::Filter::IRCv3->new },
 );
 
 has filter_line => (
@@ -862,12 +860,13 @@ stacked with L</filter_line> (at the time the attribute is built).
 
 =head3 filter_irc
 
-A L<POE::Filter::IRCv3> instance with B<colonify> enabled, by default.
+A L<POE::Filter::IRCv3> instance with B<colonify> disabled, by default (this
+behavior changed in v0.28.x).
 
-A client-side Backend will probably want a non-colonifying filter:
+A server-side Backend may want a colonifying filter:
 
   my $backend = POEx::IRC::Backend->new(
-    filter_irc => POE::Filter::IRCv3->new(colonify => 0),
+    filter_irc => POE::Filter::IRCv3->new(colonify => 1),
     ...
   );
 
