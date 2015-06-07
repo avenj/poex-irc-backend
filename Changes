@@ -1,5 +1,16 @@
 # Changes for POEx::IRC::Backend
 
+0.027002 2015-06-07
+
+  - Default to using a 'colonify => 0' filter_irc; this seems to line 
+    up better with expected behavior and matches POE::Filter::IRCv3's
+    default
+
+  - Fix ->send to respect the 'colonify' attribute of a given
+    IRC::Message::Object
+
+  - Depend on newer IRC::Toolkit so we can access $ircmsg->has_colonify
+
 0.027001 2015-05-18
 
   - Allow passing a Connect object to ->disconnect

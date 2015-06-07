@@ -89,12 +89,13 @@ stacked with ["filter\_line"](#filter_line) (at the time the attribute is built)
 
 ### filter\_irc
 
-A [POE::Filter::IRCv3](https://metacpan.org/pod/POE::Filter::IRCv3) instance with **colonify** enabled, by default.
+A [POE::Filter::IRCv3](https://metacpan.org/pod/POE::Filter::IRCv3) instance with **colonify** disabled, by default (this
+behavior changed in v0.28.x).
 
-A client-side Backend will probably want a non-colonifying filter:
+A server-side Backend may want a colonifying filter:
 
     my $backend = POEx::IRC::Backend->new(
-      filter_irc => POE::Filter::IRCv3->new(colonify => 0),
+      filter_irc => POE::Filter::IRCv3->new(colonify => 1),
       ...
     );
 
