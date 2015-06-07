@@ -2,7 +2,7 @@ package POEx::IRC::Backend::Listener;
 
 use Types::Standard -types;
 
-use Moo; use MooX::late;
+use Moo;
 with 'POEx::IRC::Backend::Role::Connector';
 
 has idle  => (

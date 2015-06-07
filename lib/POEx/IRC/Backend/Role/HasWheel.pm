@@ -1,9 +1,8 @@
 package POEx::IRC::Backend::Role::HasWheel;
 
-use strictures 1;
-
 use Types::Standard -all;
-use Moo::Role; use MooX::late;
+
+use Moo::Role;
 
 has wheel_id => (
   lazy    => 1,

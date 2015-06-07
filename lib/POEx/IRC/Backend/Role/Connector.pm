@@ -1,6 +1,6 @@
 package POEx::IRC::Backend::Role::Connector;
 
-use Moo::Role; use MooX::late;
+use Moo::Role;
 with 'POEx::IRC::Backend::Role::HasWheel';
 
 has addr => (

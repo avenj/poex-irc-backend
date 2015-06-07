@@ -1,9 +1,8 @@
 package POEx::IRC::Backend::Connect;
 
-use Carp;
 use Types::Standard -all;
 
-use Moo; use MooX::late;
+use Moo;
 with 'POEx::IRC::Backend::Role::HasWheel';
 
 has args => (

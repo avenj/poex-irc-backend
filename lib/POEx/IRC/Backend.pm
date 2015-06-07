@@ -1,7 +1,9 @@
 package POEx::IRC::Backend;
 
-use strictures 1;
+use strictures 2;
+
 use Carp;
+use Scalar::Util 'blessed';
 
 use IRC::Message::Object 'ircmsg';
 
@@ -35,7 +37,7 @@ use POEx::IRC::Backend::_Util;
 sub RUNNING_IN_HELL () { $^O =~ /(cygwin|MSWin32)/ }
 
 
-use Moo; use MooX::late;
+use Moo;
 
 
 has session_id => (
