@@ -632,6 +632,7 @@ sub send {
       ( $out->has_prefix ? (prefix  => $out->prefix) : () ),
       ( $out->has_params ? (params  => $out->params) : () ),
       ( $out->has_tags   ? (tags    => $out->tags  ) : () ),
+      ( $out->has_colonify ? (colonify => $out->colonify) : () ),
     };
   }
 
