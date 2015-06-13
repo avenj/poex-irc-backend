@@ -629,12 +629,13 @@ sub send {
   my ($self, $out, @ids) = @_;
 
   if (blessed $out && $out->isa('IRC::Message::Object')) {
+    # breaks encapsulation for performance reasons:
     $out = +{
       command => $out->command,
-      ( $out->has_prefix ? (prefix  => $out->prefix) : () ),
-      ( $out->has_params ? (params  => $out->params) : () ),
-      ( $out->has_tags   ? (tags    => $out->tags  ) : () ),
-      ( $out->has_colonify ? (colonify => $out->colonify) : () ),
+      (
+        map {; exists $out->{$_} ? ($_ => $out->{$_}) : () }
+          qw/ colonify prefix params tags /
+      ),
     };
   }
 
