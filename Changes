@@ -1,5 +1,11 @@
 # Changes for POEx::IRC::Backend
 
+0.027003 2015-06-13
+
+  - Optimize ->send when used with IRC::Message::Object messages
+
+  - Switch to Moo-2, strictures-2; drop MooX::late
+
 0.027002 2015-06-07
 
   - Default to using a 'colonify => 0' filter_irc; this seems to line 
