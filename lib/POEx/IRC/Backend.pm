@@ -660,11 +660,15 @@ sub disconnect {
   confess "disconnect() needs an (extant) wheel ID or ->wheel_id"
     unless defined $w_id;
 
-  # May be trying to disconnect() a wheel that's gone;
-  # it is a bit tricky to determine if the user has just passed us some total
-  # crap or a previously-valid-now-gone wheel, unsure how I feel about warning
-  # on these:
-  return unless defined $self->wheels->{$w_id};
+  # Application code should probably check $conn->has_wheel before trying to
+  # call a ->disconnect, but if not, it's hard to determine if we were passed
+  # junk or just racing against an already-gone wheel:
+  unless (defined $self->wheels->{$w_id}) {
+    carp "Attempting to disconnect() unknown wheel '$w_id'\n",
+      " This warning may be spurious. Your wheel may have died of natural causes.\n",
+      " Try checking '\$conn->has_wheel' before calling disconnect()." ;
+    return
+  }
 
   $self->wheels->{$w_id}->is_disconnecting(
     $str || "Client disconnect"
@@ -966,6 +970,16 @@ when the L<POE::Wheel::SocketFactory> wheel goes out of scope.
 
 Given a L<POEx::IRC::Backend::Connect> or its C<wheel_id>, mark the specified
 wheel for disconnection.
+
+This method will warn if the given C<wheel_id> cannot be found, which may be
+due to the connection disappearing prior to calling C<disconnect>.
+
+You can avoid spurious warnings by checking if the
+L<POEx::IRC::Backend::Connect> still has an active wheel attached:
+
+  if ($this_conn->has_wheel) {
+    $backend->disconnect( $this_conn )
+  }
 
 =head3 send
 
