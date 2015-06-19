@@ -1,5 +1,9 @@
 # Changes for POEx::IRC::Backend
 
+0.027004 2015-06-19
+
+  - Fix a ->disconnect bug that could throw an exception under race
+
 0.027003 2015-06-13
 
   - Optimize ->send when used with IRC::Message::Object messages
