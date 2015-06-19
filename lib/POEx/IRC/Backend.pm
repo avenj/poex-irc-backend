@@ -657,9 +657,14 @@ sub disconnect {
   my ($self, $w_id, $str) = @_;
   $w_id = $w_id->wheel_id if blessed $w_id;
 
-  confess "disconnect() needs an (extant) wheel ID"
-    unless defined $w_id
-    and    defined $self->wheels->{$w_id};
+  confess "disconnect() needs an (extant) wheel ID or ->wheel_id"
+    unless defined $w_id;
+
+  # May be trying to disconnect() a wheel that's gone;
+  # it is a bit tricky to determine if the user has just passed us some total
+  # crap or a previously-valid-now-gone wheel, unsure how I feel about warning
+  # on these:
+  return unless defined $self->wheels->{$w_id};
 
   $self->wheels->{$w_id}->is_disconnecting(
     $str || "Client disconnect"
