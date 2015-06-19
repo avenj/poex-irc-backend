@@ -1192,6 +1192,9 @@ Zlib and SSL are mostly untested.
 L<POEx::IRC::Client::Lite> for an experimental IRC client library using this
 backend.
 
+L<https://github.com/miniCruzer/irssi-bouncer> for an irssi-based
+bouncer/proxy system using this backend.
+
 L<POE::Filter::IRCv3> and L<IRC::Message::Object> for documentation regarding
 IRC message parsing.
 
