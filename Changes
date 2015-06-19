@@ -1,8 +1,14 @@
 # Changes for POEx::IRC::Backend
 
+0.027005 2015-06-19
+
+  - Warn informatively on ->disconnect against an inactive wheel
+    and fix documentation regarding how to avoid that particular race
+
 0.027004 2015-06-19
 
   - Fix a ->disconnect bug that could throw an exception under race
+    (reported by Sam "miniCruzer" Hoffman)
 
 0.027003 2015-06-13
 
@@ -18,12 +24,14 @@
 
   - Fix ->send to respect the 'colonify' attribute of a given
     IRC::Message::Object
+    (reported by Sam "miniCruzer" Hoffman)
 
   - Depend on newer IRC::Toolkit so we can access $ircmsg->has_colonify
 
 0.027001 2015-05-18
 
   - Allow passing a Connect object to ->disconnect
+    (miniCruzer)
 
 0.026001 2015-01-16
 

@@ -186,6 +186,16 @@ when the [POE::Wheel::SocketFactory](https://metacpan.org/pod/POE::Wheel::Socket
 Given a [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect) or its `wheel_id`, mark the specified
 wheel for disconnection.
 
+This method will warn if the given `wheel_id` cannot be found, which may be
+due to the connection disappearing prior to calling `disconnect`.
+
+You can avoid spurious warnings by checking if the
+[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect) still has an active wheel attached:
+
+    if ($this_conn->has_wheel) {
+      $backend->disconnect( $this_conn )
+    }
+
 ### send
 
     $backend->send(
