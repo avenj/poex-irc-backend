@@ -46,6 +46,9 @@ A L<Moo::Role> for classes that have associated POE::Wheel instances.
 A L<POE::Wheel> instance (typically L<POE::Wheel::SocketFactory> for listeners
 and connectors or L<POE::Wheel::ReadWrite> for live connections).
 
+This is primarily for internal use. External code should not interact directly
+with the C<wheel>.
+
 Can be cleared via B<clear_wheel>; use B<has_wheel> to determine if this
 listener's wheel has been cleared.
 
