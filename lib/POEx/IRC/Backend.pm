@@ -646,11 +646,10 @@ sub send {
 }
 
 sub disconnect {
-  ## Mark a wheel for disconnection.
+  # Mark a wheel for disconnection at next flush.
   my ($self, $w_id, $str) = @_;
   $w_id = $w_id->wheel_id if blessed $w_id;
-
-  confess "disconnect() needs an (extant) wheel ID or ->wheel_id"
+  confess "disconnect() needs an (extant) wheel ID or Connect object"
     unless defined $w_id;
 
   # Application code should probably check $conn->has_wheel before trying to
@@ -663,10 +662,24 @@ sub disconnect {
     return
   }
 
-  $self->wheels->{$w_id}->is_disconnecting(
-    $str || "Client disconnect"
-  );
+  $self->wheels->{$w_id}->is_disconnecting($str // "Client disconnect");
+  $self
+}
 
+sub disconnect_now {
+  my ($self, $w_id, $str) = @_;
+  $w_id = $w_id->wheel_id if blessed $w_id;
+  confess "disconnect_now needs an (extant) wheel ID or Connect object"
+    unless defined $w_id;
+
+  unless (defined $self->wheels->{$w_id}) {
+    carp "Attempting to disconnect() unknown wheel '$w_id'\n",
+      " This warning may be spurious. Your wheel may have died of natural causes.\n",
+      " Try checking '\$conn->has_wheel' before calling disconnect()." ;
+    return
+  }
+
+  $self->_disconnected($w_id, $str // "Client disconnect");
   $self
 }
 
