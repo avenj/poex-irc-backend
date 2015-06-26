@@ -244,10 +244,12 @@ sub _accept_conn {
   }
   my $listener = $self->listeners->{$listener_id};
 
+  my $really_ssl;
   if ( $listener->ssl ) {
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
-      $sock = POE::Component::SSLify::Server_SSLify($sock)
+      $sock = POE::Component::SSLify::Server_SSLify($sock);
+      $really_ssl = 1
     } catch {
       warn "Could not SSLify (server) socket: $_\n";
       undef
@@ -267,7 +269,11 @@ sub _accept_conn {
     return
   }
 
-  my ($sockaddr, $sockport) = get_unpacked_addr( getsockname $sock );
+  my ($sockaddr, $sockport) = get_unpacked_addr( 
+    getsockname(
+      $really_ssl ? POE::Component::SSLify::SSLify_GetSocket($sock) : $sock
+    )
+  );
   my $this_conn = POEx::IRC::Backend::Connect->new(
     protocol  => $protocol,
     wheel     => $wheel,
@@ -511,10 +517,12 @@ sub _connector_up {
   ## No need to try to connect out any more; remove from connectors pool:
   my $ct = delete $self->connectors->{$c_id};
 
+  my $really_ssl;
   if ( $ct->ssl ) {
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
-      $sock = POE::Component::SSLify::Client_SSLify($sock)
+      $sock = POE::Component::SSLify::Client_SSLify($sock);
+      $really_ssl = 1
     } catch {
       warn "Could not SSLify (client) socket: $_\n";
       undef
@@ -536,7 +544,11 @@ sub _connector_up {
     return
   }
 
-  my ($sockaddr, $sockport) = get_unpacked_addr( getsockname $sock );
+  my ($sockaddr, $sockport) = get_unpacked_addr(
+    getsockname(
+      $really_ssl ? POE::Component::SSLify::SSLify_GetSocket($sock) : $sock
+    )
+  );
 
   my $this_conn = POEx::IRC::Backend::Connect->new(
     ($ct->has_args ? (args => $ct->args) : () ),
