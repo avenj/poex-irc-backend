@@ -247,7 +247,7 @@ sub _accept_conn {
   if ( $listener->ssl ) {
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
-      $sock = POE::Component::SSLify::Client_SSLify($sock)
+      $sock = POE::Component::SSLify::Server_SSLify($sock)
     } catch {
       warn "Could not SSLify (server) socket: $_\n";
       undef
