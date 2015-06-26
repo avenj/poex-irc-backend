@@ -196,6 +196,12 @@ You can avoid spurious warnings by checking if the
       $backend->disconnect( $this_conn )
     }
 
+Note that disconnection happens after a buffer flush; if your software does
+not perform entirely like a traditional platform (server implementations
+will typically send `ERROR: Closing Link` or similar to clients marked
+for disconnection, which will trigger a buffer flush) you may currently experience
+"late" disconnects. This behavior may be subject to change in future versions.
+
 ### send
 
     $backend->send(
@@ -404,6 +410,9 @@ Zlib and SSL are mostly untested.
 
 [POEx::IRC::Client::Lite](https://metacpan.org/pod/POEx::IRC::Client::Lite) for an experimental IRC client library using this
 backend.
+
+[https://github.com/miniCruzer/irssi-bouncer](https://github.com/miniCruzer/irssi-bouncer) for an irssi-based
+bouncer/proxy system using this backend.
 
 [POE::Filter::IRCv3](https://metacpan.org/pod/POE::Filter::IRCv3) and [IRC::Message::Object](https://metacpan.org/pod/IRC::Message::Object) for documentation regarding
 IRC message parsing.

@@ -1,5 +1,11 @@
 # Changes for POEx::IRC::Backend
 
+0.027006 2015-06-25
+
+  - Fix server-side SSLification (miniCruzer)
+
+  - Documentation improvements
+
 0.027005 2015-06-19
 
   - Warn informatively on ->disconnect against an inactive wheel
