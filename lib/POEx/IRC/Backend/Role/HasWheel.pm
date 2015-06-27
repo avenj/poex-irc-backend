@@ -14,7 +14,7 @@ has wheel_id => (
 
 has wheel => (
   required  => 1,
-  isa       => InstanceOf['POE::Wheel'],
+  isa       => Maybe[ InstanceOf['POE::Wheel'] ],
   is        => 'ro',
   clearer   => 'clear_wheel',
   writer    => 'set_wheel',
