@@ -21,6 +21,11 @@ use POE qw/
 use Socket qw/
   AF_INET AF_INET6
   pack_sockaddr_in
+
+  getnameinfo
+  NI_NUMERICHOST
+  NI_NUMERICSERV
+  NIx_NOSERV
 /;
 
 use Types::Standard -all;
@@ -31,10 +36,18 @@ use Try::Tiny;
 use POEx::IRC::Backend::Connect;
 use POEx::IRC::Backend::Connector;
 use POEx::IRC::Backend::Listener;
-use POEx::IRC::Backend::_Util;
 
 
 sub RUNNING_IN_HELL () { $^O =~ /(cygwin|MSWin32)/ }
+
+sub get_unpacked_addr {
+  my ($sock_packed, %params) = @_;
+  my ($err, $addr, $port) = getnameinfo $sock_packed,
+     NI_NUMERICHOST | NI_NUMERICSERV,
+      ( $params{noserv} ? NIx_NOSERV : () );
+  croak $err if $err;
+  $params{noserv} ? $addr : ($addr, $port)
+}
 
 
 use Moo;
