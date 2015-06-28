@@ -1225,6 +1225,16 @@ Zlib and SSL are mostly untested.
 
 =head1 SEE ALSO
 
+L<POEx::IRC::Backend::Connect>
+
+L<POEx::IRC::Backend::Connector>
+
+L<POEx::IRC::Backend::Listener>
+
+L<POEx::IRC::Backend::Role::Connector>
+
+L<POEx::IRC::Backend::Role::HasWheel>
+
 L<POEx::IRC::Client::Lite> for an experimental IRC client library using this
 backend.
 
