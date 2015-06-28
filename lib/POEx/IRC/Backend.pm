@@ -874,10 +874,11 @@ L<IRC::Message::Object> objects.
 
 Inspired by L<POE::Component::Server::IRC::Backend> & L<POE::Component::IRC>.
 
-This is a very low-level interface to IRC sockets. See
-L<POEx::IRC::Client::Lite> for an experimental IRC client library using this
-backend (and the L</"SEE ALSO"> section of this documentation for related
-tools).
+This is a very low-level interface to IRC sockets; the goal is to provide all
+the necessary scaffolding to develop stateless or stateful IRC clients and
+daemons. See L<POEx::IRC::Client::Lite> for an experimental IRC client library
+using this backend (and the L</"SEE ALSO"> section of this documentation for
+related tools).
 
 =head2 Attributes
 
@@ -1135,8 +1136,13 @@ L<POEx::IRC::Backend::Connect>
 Dispatched when a connection wheel has had no input for longer than 
 specified idle time (see L</create_listener> regarding idle times).
 
+Currently these events are only issued for incoming Connects accepted on a
+Listener, not outgoing Connects created by a Connector.
+
 C<$_[ARG0]> is the connection's 
 L<POEx::IRC::Backend::Connect>
+
+See also: L<POEx::IRC::Backend::Connect/ping_pending>
 
 =head3 ircsock_connector_failure
 

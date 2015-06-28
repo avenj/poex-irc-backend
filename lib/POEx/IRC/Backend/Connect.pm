@@ -168,6 +168,8 @@ Predicate: B<has_args>
 
 Boolean true if the Zlib filter has been added.
 
+See also: L<POEx::IRC::Backend/set_compressed_link>
+
 =head2 set_compressed
 
 Change the boolean value of the L</compressed> attrib.
