@@ -5,7 +5,7 @@ use strictures 2;
 use Carp;
 use Scalar::Util 'blessed';
 
-use IRC::Message::Object 'ircmsg';
+use IRC::Message::Object ();
 
 use Net::IP::Minimal 'ip_is_ipv6';
 
@@ -184,7 +184,6 @@ sub spawn {
     ],
   ) or confess "Failed to spawn POE::Session";
 
-  ##  FIXME document that we need a pubkey + cert for server-side ssl
   if (defined $ssl_opts) {
     confess "expected ssl_opts to be an ARRAY but got $ssl_opts"
       unless ref $ssl_opts eq 'ARRAY';
@@ -610,7 +609,7 @@ sub _ircsock_input {
   ## FIXME configurable raw events?
 
   $kernel->post( $self->controller => 
-    ircsock_input => $this_conn, ircmsg(%$input)
+    ircsock_input => $this_conn, IRC::Message::Object->new(%$input)
   );
 }
 
