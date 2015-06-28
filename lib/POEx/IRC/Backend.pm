@@ -900,7 +900,7 @@ stacked with L</filter_line> (at the time the attribute is built).
 =head3 filter_irc
 
 A L<POE::Filter::IRCv3> instance with B<colonify> disabled, by default (this
-behavior changed in v0.28.x).
+behavior changed in v0.27.2).
 
 A server-side Backend may want a colonifying filter:
 
