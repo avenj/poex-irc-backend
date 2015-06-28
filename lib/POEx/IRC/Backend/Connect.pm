@@ -191,9 +191,22 @@ Boolean true if the connection wheel has been marked as a peer.
 
 =head2 is_pending_compress
 
-Boolean true if the Wheel needs a Zlib filter.
+Primarily for internal use; boolean true if the Wheel needs a Zlib filter on
+next buffer flush.
 
-  $obj->is_pending_compress(1)
+=head2 ping_pending
+
+The B<rw> C<ping_pending> attribute can be used to manage standard IRC
+PING/PONG heartbeating; a server can call C<< $conn->ping_pending(1) >> upon
+dispatching a PING to a client (because of an C<ircsock_connection_idle>
+event, for example) and C<< $conn->ping_pending(0) >> when a
+response is received.
+
+If C<< $conn->ping_pending >> is true on the next C<ircsock_connection_idle>,
+the client can be considered to have timed out and your server-side C<Backend>
+can issue a disconnect; this emulates standard IRCD behavior.
+
+See also: L<POEx::IRC::Backend/ircsock_connection_idle>
 
 =head2 peeraddr
 
