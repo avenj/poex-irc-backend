@@ -1,0 +1,14 @@
+(loosely priority-ordered)
+
+# Test improvements.
+
+# Optional idle timer for outgoing Connector-spawned Connects.
+
+# 'args =>' attr behavior for Listeners similar to current Connectors
+
+# Optionally skip ircmsg() and dispatch raw events from _ircsock_input
+
+# IP blacklisting for Listeners
+  - per-backend and/or per-listener
+
+# Better documentation regarding server-side SSL.
