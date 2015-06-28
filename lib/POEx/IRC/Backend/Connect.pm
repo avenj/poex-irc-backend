@@ -127,7 +127,7 @@ has sockport => (
 
 =pod
 
-=for Pod::Coverage has_\w+
+=for Pod::Coverage has_\w+ set_\w+
 
 =head1 NAME
 
@@ -150,9 +150,11 @@ attributes:
 =head2 alarm_id
 
 Connected socket wheels normally have a POE alarm ID attached for an idle 
-timer. This attribute is writable.
+timer.
 
-Predicate: B<has_alarm_id>
+Predicate: C<has_alarm_id>
+
+B<rw> attribute.
 
 =head2 args
 
@@ -164,7 +166,7 @@ Predicate: B<has_args>
 
 =head2 compressed
 
-Set to true if the Zlib filter has been added.
+Boolean true if the Zlib filter has been added.
 
 =head2 set_compressed
 
@@ -174,6 +176,8 @@ Change the boolean value of the L</compressed> attrib.
 
 Idle time used for connection check alarms.
 
+See also: L</ping_pending>, L<POEx::IRC::Backend/ircsock_connection_idle>
+
 =head2 is_disconnecting
 
 Boolean false if the Connect is not in a disconnecting state; if it is 
@@ -181,22 +185,32 @@ true, it is the disconnect message:
 
   $obj->is_disconnecting("Client quit")
 
+B<rw> attribute.
+
+See also: L<POEx::IRC::Backend/disconnect>
+
 =head2 is_client
 
 Boolean true if the connection wheel has been marked as a client.
 
+B<rw> attribute.
+
 =head2 is_peer
 
 Boolean true if the connection wheel has been marked as a peer.
+
+B<rw> attribute.
 
 =head2 is_pending_compress
 
 Primarily for internal use; boolean true if the Wheel needs a Zlib filter on
 next buffer flush.
 
+B<rw> attribute.
+
 =head2 ping_pending
 
-The B<rw> C<ping_pending> attribute can be used to manage standard IRC
+The C<ping_pending> attribute can be used to manage standard IRC
 PING/PONG heartbeating; a server can call C<< $conn->ping_pending(1) >> upon
 dispatching a PING to a client (because of an C<ircsock_connection_idle>
 event, for example) and C<< $conn->ping_pending(0) >> when a
@@ -206,39 +220,47 @@ If C<< $conn->ping_pending >> is true on the next C<ircsock_connection_idle>,
 the client can be considered to have timed out and your server-side C<Backend>
 can issue a disconnect; this emulates standard IRCD behavior.
 
+B<rw> attribute.
+
 See also: L<POEx::IRC::Backend/ircsock_connection_idle>
 
 =head2 peeraddr
 
 The remote peer address.
 
+Writer: C<set_peeraddr>
+
 =head2 peerport
 
 The remote peer port.
 
+Writer: C<set_peerport>
+
 =head2 protocol
 
-The protocol in use (4 or 6).
+The protocol in use (4 or 6); set by L<POEx::IRC::Backend> at connection time.
 
 =head2 seen
 
-Timestamp; should be updated when traffic is seen from this Connect:
+Timestamp of last socket activity; updated by L<POEx::IRC::Backend> when
+traffic is seen from this Connect.
 
-  ## In an input handler
-  $obj->seen( time )
+B<rw> attribute.
 
 =head2 sockaddr
 
 Our socket address.
 
+Writer: C<set_sockaddr>
+
 =head2 sockport
 
 Our socket port.
 
+Writer: C<set_sockport>
+
 =head1 AUTHOR
 
 Jon Portnoy <avenj@cobaltirc.org>
-
-=for Pod::Coverage set_(?:peer|sock)(?:addr|port)
 
 =cut
