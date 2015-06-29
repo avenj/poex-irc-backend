@@ -133,7 +133,7 @@ has wheels => (
 has ssl_context => (
   lazy      => 1,
   is        => 'ro',
-  writer    => 'set_ssl_context',
+  writer    => '_set_ssl_context',
   default   => sub { undef },
 );
 
@@ -197,7 +197,7 @@ sub spawn {
     my $ssl_err;
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
-      $self->set_ssl_context(
+      $self->_set_ssl_context(
         POE::Component::SSLify::SSLify_ContextCreate( @$ssl_opts )
       );
       1

@@ -35,6 +35,8 @@ has ssl => (
 
 =pod
 
+=for Pod::Coverage has_\w+
+
 =head1 NAME
 
 POEx::IRC::Backend::Role::Socket - IRC socket connector behavior
