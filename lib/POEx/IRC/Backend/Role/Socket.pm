@@ -1,4 +1,4 @@
-package POEx::IRC::Backend::Role::Connector;
+package POEx::IRC::Backend::Role::Socket;
 
 use Moo::Role;
 with 'POEx::IRC::Backend::Role::HasWheel';
@@ -37,7 +37,7 @@ has ssl => (
 
 =head1 NAME
 
-POEx::IRC::Backend::Role::Connector - IRC socket connector behavior
+POEx::IRC::Backend::Role::Socket - IRC socket connector behavior
 
 =head1 SYNOPSIS
 

@@ -1,7 +1,5 @@
 (loosely priority-ordered)
 
-# Better name for Role::Connector (Role::Socket ?)
-
 # Test improvements.
   - disconnect behavior ('disconnect' branch)
 
@@ -13,7 +11,7 @@
   - per-backend and/or per-listener
 
 # Expose more SSLify functions
-  - Role for Connects with ssl => 1 ?
+  - Role for Connects ?
   - $conn->ssl_object -> GetSSL (or undef if ssl == 0)
   - $conn->ssl_cipher -> GetCipher (or '' if ssl == 0)
   - $conn->get_socket -> GetSocket if ssl == 1 (else ->wheel->get_input_handle)

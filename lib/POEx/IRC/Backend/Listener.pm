@@ -3,7 +3,7 @@ package POEx::IRC::Backend::Listener;
 use Types::Standard -types;
 
 use Moo;
-with 'POEx::IRC::Backend::Role::Connector';
+with 'POEx::IRC::Backend::Role::Socket';
 
 has idle  => (
   lazy    => 1,
@@ -30,7 +30,7 @@ Typically created by L<POEx::IRC::Backend> to represent a listening socket.
 These objects contain details regarding L<POEx::IRC::Backend> 
 Listener sockets.
 
-This class consumes L<POEx::IRC::Backend::Role::Connector> and adds the
+This class consumes L<POEx::IRC::Backend::Role::Socket> and adds the
 following attributes:
 
 =head2 idle

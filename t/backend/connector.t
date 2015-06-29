@@ -19,7 +19,7 @@ my $listener = POEx::IRC::Backend::Connector->new(
   bindaddr => '127.0.0.1',
 );
 
-ok $listener->does('POEx::IRC::Backend::Role::Connector');
+ok $listener->does('POEx::IRC::Backend::Role::Socket');
 
 ok $listener->has_bindaddr, 'has_bindaddr ok';
 cmp_ok $listener->bindaddr, 'eq', '127.0.0.1', 'bindaddr ok';

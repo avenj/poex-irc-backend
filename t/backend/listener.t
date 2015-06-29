@@ -17,7 +17,7 @@ my $listener = POEx::IRC::Backend::Listener->new(
   args  => +{ foo => 1 },
 );
 
-ok $listener->does('POEx::IRC::Backend::Role::Connector');
+ok $listener->does('POEx::IRC::Backend::Role::Socket');
 
 ok $listener->has_args, 'has_args ok';
 is_deeply $listener->args, +{ foo => 1 }, 'args ok';

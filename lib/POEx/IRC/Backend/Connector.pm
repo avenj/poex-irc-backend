@@ -1,7 +1,7 @@
 package POEx::IRC::Backend::Connector;
 
 use Moo;
-with 'POEx::IRC::Backend::Role::Connector';
+with 'POEx::IRC::Backend::Role::Socket';
 
 has bindaddr => (
   lazy      => 1,
@@ -29,7 +29,7 @@ Created by L<POEx::IRC::Backend> for outgoing connector sockets.
 These objects contain details regarding 
 L<POEx::IRC::Backend> outgoing connector sockets.
 
-This class consumes L<POEx::IRC::Backend::Role::Connector> and adds the
+This class consumes L<POEx::IRC::Backend::Role::Socket> and adds the
 following attributes:
 
 =head2 bindaddr

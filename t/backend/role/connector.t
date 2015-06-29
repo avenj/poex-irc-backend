@@ -2,8 +2,8 @@ use Test::More;
 use strict; use warnings FATAL => 'all';
 
 { package
-    Testing::Role::Connector;
-  use Moo; with 'POEx::IRC::Backend::Role::Connector';
+    Testing::Role::Socket;
+  use Moo; with 'POEx::IRC::Backend::Role::Socket';
 }
 
 { package
@@ -13,7 +13,7 @@ use strict; use warnings FATAL => 'all';
   sub ID { 1234 }
 }
 
-my $obj = Testing::Role::Connector->new(
+my $obj = Testing::Role::Socket->new(
   addr      => '127.0.0.1',
   port      => 1234,
   protocol  => 4,
@@ -22,7 +22,7 @@ my $obj = Testing::Role::Connector->new(
 
 # HasWheel behavior
 ok $obj->does('POEx::IRC::Backend::Role::HasWheel'),
-  'POEx::IRC::Backend::Role::Connector consumes'
+  'POEx::IRC::Backend::Role::Socket consumes'
   .' POEx::IRC::Backend::Role::HasWheel';
 cmp_ok $obj->wheel_id, '==', 1234, 'mock wheel attr ok';
 
@@ -39,7 +39,7 @@ cmp_ok $obj->port, '==', 4321, 'set_port ok';
 
 # ssl
 ok !$obj->ssl, 'ssl default off';
-my $ssl_enabled = Testing::Role::Connector->new(
+my $ssl_enabled = Testing::Role::Socket->new(
   wheel     => POE::Wheel->new,
   addr      => '127.0.0.1',
   port      => 1234,
@@ -51,14 +51,14 @@ ok $ssl_enabled->ssl, 'ssl init arg ok';
 
 # missing addr
 eval {; 
-  Testing::Role::Connector->new(
+  Testing::Role::Socket->new(
     protocol => 4, port => 1234, wheel => POE::Wheel->new
   ) 
 };
 like $@, qr/addr/, 'died on missing addr attribute';
 
 # missing port
-eval {; Testing::Role::Connector->new(
+eval {; Testing::Role::Socket->new(
     protocol => 4, addr => '0.0.0.0', wheel => POE::Wheel->new
   ) 
 };
