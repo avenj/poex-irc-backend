@@ -350,7 +350,7 @@ sub _create_listener {
   my $bindaddr  = delete $args{bindaddr} || '0.0.0.0';
   my $bindport  = delete $args{port}     || 0;
 
-  my $protocol = ( delete($args{ipv6}) || ip_is_ipv6($bindaddr) ) ? 6 : 4;
+  my $protocol = ( delete $args{ipv6} || ip_is_ipv6($bindaddr) ) ? 6 : 4;
 
   my $wheel = POE::Wheel::SocketFactory->new(
     SocketDomain => ($protocol == 6 ? AF_INET6 : AF_INET),
@@ -467,7 +467,7 @@ sub _create_connector {
     unless defined $remote_addr and defined $remote_port;
 
   my $protocol =
-      delete($args{ipv6})                                ? 6
+      delete $args{ipv6}                                 ? 6
     : ip_is_ipv6($remote_addr)                           ? 6
     : ( $args{bindaddr} && ip_is_ipv6($args{bindaddr}) ) ? 6
                                                          : 4;
@@ -577,8 +577,6 @@ sub _connector_up {
   $kernel->post( $self->controller => 
     ircsock_connector_open => $this_conn
   );
-
-  ## TODO document that we don't set an idle alarm for open Connectors
 }
 
 sub _connector_failed {
