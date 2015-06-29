@@ -123,11 +123,18 @@ has connectors => (
 has wheels => (
   ## POEx::IRC::Backend::Connect objs
   ## These are our connected wheels.
-  init_arg => undef,
-  is      => 'ro',
-  isa     => HashRef,
-  writer  => '_set_wheels',
-  default => sub { +{} },
+  init_arg  => undef,
+  is        => 'ro',
+  isa       => HashRef,
+  writer    => '_set_wheels',
+  default   => sub { +{} },
+);
+
+has ssl_context => (
+  lazy      => 1,
+  is        => 'ro',
+  writer    => 'set_ssl_context',
+  default   => sub { undef },
 );
 
 
@@ -190,7 +197,9 @@ sub spawn {
     my $ssl_err;
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
-      POE::Component::SSLify::SSLify_Options( @$ssl_opts );
+      $self->set_ssl_context(
+        POE::Component::SSLify::SSLify_ContextCreate( @$ssl_opts )
+      );
       1
     } catch {
       $ssl_err = $_;
@@ -260,7 +269,7 @@ sub _accept_conn {
   if ( $listener->ssl ) {
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
-      $sock = POE::Component::SSLify::Server_SSLify($sock);
+      $sock = POE::Component::SSLify::Server_SSLify($sock, $self->ssl_context);
       $really_ssl = 1
     } catch {
       warn "Could not SSLify (server) socket: $_\n";
@@ -532,7 +541,9 @@ sub _connector_up {
   if ( $ct->ssl ) {
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
-      $sock = POE::Component::SSLify::Client_SSLify($sock);
+      $sock = POE::Component::SSLify::Client_SSLify(
+        $sock, 0, 0, $self->ssl_context
+      );
       $really_ssl = 1
     } catch {
       warn "Could not SSLify (client) socket: $_\n";
@@ -937,8 +948,9 @@ HASH of actively connected wheels, keyed on their wheel ID.
 Creates the backend's L<POE::Session>.
 
 The C<ssl_opts> ARRAY is passed directly to
-L<POE::Component::SSLify/SSLify_Options>, if present. See
-L<POE::Component::SSLify> & L<Net::SSLeay>.
+L<POE::Component::SSLify/SSLify_ContextCreate>, if present. As of C<v0.28.x>,
+each Backend gets its own L<Net::SSLeay> context object (rather than sharing
+the global context). See L<POE::Component::SSLify> & L<Net::SSLeay>.
 
 =head3 create_connector
 
