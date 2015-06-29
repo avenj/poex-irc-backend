@@ -17,4 +17,8 @@
 # IP blacklisting for Listeners
   - per-backend and/or per-listener
 
-# Better documentation regarding server-side SSL.
+# Expose more SSLify functions
+  - Role for Connects with ssl => 1 ?
+  - $conn->ssl_object -> GetSSL (or undef if ssl == 0)
+  - $conn->ssl_cipher -> GetCipher (or '' if ssl == 0)
+  - $conn->get_socket -> GetSocket if ssl == 1, else query POE?
