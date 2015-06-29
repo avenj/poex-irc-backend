@@ -1,10 +1,16 @@
 (loosely priority-ordered)
 
+# Better name for Role::Connector (Role::Socket ?)
+
 # Test improvements.
+  - disconnect behavior ('disconnect' branch)
 
 # Optional idle timer for outgoing Connector-spawned Connects.
 
 # 'args =>' attr behavior for Listeners similar to current Connectors
+  - move 'args' attr from Listener to Role::Connector
+  - attach extra args from params in _create_listener
+  - pass to Connect->new in _accept_conn if $listener->has_args
 
 # Optionally skip ircmsg() and dispatch raw events from _ircsock_input
 
