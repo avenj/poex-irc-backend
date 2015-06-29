@@ -961,7 +961,8 @@ attempt to establish an outgoing connection immediately.
 
 Unrecognized options are stored in the L<POEx::IRC::Backend::Connector>'s
 C<args> HASH-type attribute; this is passed to successfully created
-L<POEx::IRC::Backend::Connect> instances (as of C<v0.26.x>).
+L<POEx::IRC::Backend::Connect> instances (as of C<v0.26.x>). Note that the
+reference is shared, not copied.
 
 =head3 create_listener
 

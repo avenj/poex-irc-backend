@@ -7,11 +7,6 @@
 
 # Optional idle timer for outgoing Connector-spawned Connects.
 
-# 'args =>' attr behavior for Listeners similar to current Connectors
-  - (DONE) move 'args' attr from Listener to Role::Connector
-  - attach extra args from params in _create_listener
-  - pass to Connect->new in _accept_conn if $listener->has_args
-
 # Optionally skip ircmsg() and dispatch raw events from _ircsock_input
 
 # IP blacklisting for Listeners
