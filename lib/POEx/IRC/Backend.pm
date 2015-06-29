@@ -928,6 +928,11 @@ HASH of active Listener objects, keyed on their wheel ID.
 
 Returns the backend's session ID.
 
+=head3 ssl_context
+
+Returns the L<Net::SSLeay> Context object, if we have one (or C<undef> if
+not); the context is set up by L</spawn> if C<ssl_opts> are specified.
+
 =head3 wheels
 
 HASH of actively connected wheels, keyed on their wheel ID.

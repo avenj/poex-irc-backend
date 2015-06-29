@@ -2,6 +2,8 @@
 
 # Test improvements.
   - disconnect behavior ('disconnect' branch)
+  - SSL (if SSLify present)
+  - peer-to-peer zlib
 
 # Optional idle timer for outgoing Connector-spawned Connects.
 
