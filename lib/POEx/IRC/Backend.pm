@@ -939,6 +939,10 @@ HASH of actively connected wheels, keyed on their wheel ID.
 
 Creates the backend's L<POE::Session>.
 
+The C<ssl_opts> ARRAY is passed directly to
+L<POE::Component::SSLify/SSLify_Options>, if present. See
+L<POE::Component::SSLify> & L<Net::SSLeay>.
+
 =head3 create_connector
 
   $backend->create_connector(
