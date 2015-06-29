@@ -65,10 +65,11 @@ implementations) to speak the IRC protocol to endpoints via
 
 Inspired by [POE::Component::Server::IRC::Backend](https://metacpan.org/pod/POE::Component::Server::IRC::Backend) & [POE::Component::IRC](https://metacpan.org/pod/POE::Component::IRC).
 
-This is a very low-level interface to IRC sockets. See
-[POEx::IRC::Client::Lite](https://metacpan.org/pod/POEx::IRC::Client::Lite) for an experimental IRC client library using this
-backend (and the ["SEE ALSO"](#see-also) section of this documentation for related
-tools).
+This is a very low-level interface to IRC sockets; the goal is to provide all
+the necessary scaffolding to develop stateless or stateful IRC clients and
+daemons. See [POEx::IRC::Client::Lite](https://metacpan.org/pod/POEx::IRC::Client::Lite) for an experimental IRC client library
+using this backend (and the ["SEE ALSO"](#see-also) section of this documentation for
+related tools).
 
 ## Attributes
 
@@ -90,7 +91,7 @@ stacked with ["filter\_line"](#filter_line) (at the time the attribute is built)
 ### filter\_irc
 
 A [POE::Filter::IRCv3](https://metacpan.org/pod/POE::Filter::IRCv3) instance with **colonify** disabled, by default (this
-behavior changed in v0.28.x).
+behavior changed in v0.27.2).
 
 A server-side Backend may want a colonifying filter:
 
@@ -111,6 +112,11 @@ HASH of active Listener objects, keyed on their wheel ID.
 
 Returns the backend's session ID.
 
+### ssl\_context
+
+Returns the [Net::SSLeay](https://metacpan.org/pod/Net::SSLeay) Context object, if we have one (or `undef` if
+not); the context is set up by ["spawn"](#spawn) if `ssl_opts` are specified.
+
 ### wheels
 
 HASH of actively connected wheels, keyed on their wheel ID.
@@ -128,6 +134,11 @@ HASH of actively connected wheels, keyed on their wheel ID.
     );
 
 Creates the backend's [POE::Session](https://metacpan.org/pod/POE::Session).
+
+The `ssl_opts` ARRAY is passed directly to
+["SSLify\_ContextCreate" in POE::Component::SSLify](https://metacpan.org/pod/POE::Component::SSLify#SSLify_ContextCreate), if present. As of `v0.28.x`,
+each Backend gets its own [Net::SSLeay](https://metacpan.org/pod/Net::SSLeay) context object (rather than sharing
+the global context). See [POE::Component::SSLify](https://metacpan.org/pod/POE::Component::SSLify) & [Net::SSLeay](https://metacpan.org/pod/Net::SSLeay).
 
 ### create\_connector
 
@@ -148,7 +159,8 @@ attempt to establish an outgoing connection immediately.
 
 Unrecognized options are stored in the [POEx::IRC::Backend::Connector](https://metacpan.org/pod/POEx::IRC::Backend::Connector)'s
 `args` HASH-type attribute; this is passed to successfully created
-[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect) instances (as of `v0.026`).
+[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect) instances (as of `v0.26.x`). Note that the
+reference is shared, not copied.
 
 ### create\_listener
 
@@ -163,6 +175,11 @@ Unrecognized options are stored in the [POEx::IRC::Backend::Connector](https://m
 
 Attempts to create a [POEx::IRC::Backend::Listener](https://metacpan.org/pod/POEx::IRC::Backend::Listener) 
 that holds a [POE::Wheel::SocketFactory](https://metacpan.org/pod/POE::Wheel::SocketFactory) listener wheel.
+
+Unrecognized arguments will be added to the Listener object's `args`
+attribute, which is then passed on to [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect) objects
+created by incoming connections to that listener, similar to the behavior
+described in ["create\_connector"](#create_connector) (as of `v0.28.x`).
 
 ### remove\_listener
 
@@ -323,8 +340,13 @@ Dispatched when a connection wheel has had a compression filter added.
 Dispatched when a connection wheel has had no input for longer than 
 specified idle time (see ["create\_listener"](#create_listener) regarding idle times).
 
+Currently these events are only issued for incoming Connects accepted on a
+Listener, not outgoing Connects created by a Connector.
+
 `$_[ARG0]` is the connection's 
 [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect)
+
+See also: ["ping\_pending" in POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect#ping_pending)
 
 ### ircsock\_connector\_failure
 
@@ -407,6 +429,16 @@ Tests are a bit incomplete, as of this writing.
 Zlib and SSL are mostly untested.
 
 # SEE ALSO
+
+[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect)
+
+[POEx::IRC::Backend::Connector](https://metacpan.org/pod/POEx::IRC::Backend::Connector)
+
+[POEx::IRC::Backend::Listener](https://metacpan.org/pod/POEx::IRC::Backend::Listener)
+
+[POEx::IRC::Backend::Role::Socket](https://metacpan.org/pod/POEx::IRC::Backend::Role::Socket)
+
+[POEx::IRC::Backend::Role::HasWheel](https://metacpan.org/pod/POEx::IRC::Backend::Role::HasWheel)
 
 [POEx::IRC::Client::Lite](https://metacpan.org/pod/POEx::IRC::Client::Lite) for an experimental IRC client library using this
 backend.

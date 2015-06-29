@@ -1,5 +1,25 @@
 # Changes for POEx::IRC::Backend
 
+0.028001 2015-06-29
+
+  - Stop using the global POE::Component::SSLify context, maintain
+    per-Backend contexts instead to avoid trampling global options
+
+  - Add 'args' attr behavior to Listeners to act like Connectors; extra
+    unrecognized ->create_listener() parameters are saved to the Listener's
+    'args' HASH and passed to produced Connect objects
+
+  - Documentation improvements
+
+  - Minor message dispatch optimizations
+
+  - ::Role::Connector moved to ::Role::Socket to reduce confusion with
+    the Connector class
+
+  - Explicitly allow an undef 'wheel' attr
+
+  - Inline single-function ::_Util class, drop Exporter::Tiny dep
+
 0.027006 2015-06-25
 
   - Fix server-side SSLification (miniCruzer)
