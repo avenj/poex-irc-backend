@@ -8,6 +8,13 @@ has addr => (
   is       => 'ro',
 );
 
+has args => (
+  lazy      => 1,
+  is        => 'ro',
+  predicate => 1,
+  default   => sub { +{} },
+);
+
 has port => (
   required => 1,
   is       => 'ro',
@@ -49,6 +56,15 @@ following attributes:
 =head2 addr
 
 The local address we are bound to.
+
+=head2 args
+
+Arbitrary metadata attached to this Connector. (By default, this is a HASH.)
+
+This is typically passed on to a successfully spawned
+L<POEx::IRC::Backend::Connect>.
+
+Predicate: B<has_args>
 
 =head2 port
 

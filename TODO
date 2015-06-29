@@ -8,7 +8,7 @@
 # Optional idle timer for outgoing Connector-spawned Connects.
 
 # 'args =>' attr behavior for Listeners similar to current Connectors
-  - move 'args' attr from Listener to Role::Connector
+  - (DONE) move 'args' attr from Listener to Role::Connector
   - attach extra args from params in _create_listener
   - pass to Connect->new in _accept_conn if $listener->has_args
 
@@ -21,4 +21,4 @@
   - Role for Connects with ssl => 1 ?
   - $conn->ssl_object -> GetSSL (or undef if ssl == 0)
   - $conn->ssl_cipher -> GetCipher (or '' if ssl == 0)
-  - $conn->get_socket -> GetSocket if ssl == 1, else query POE?
+  - $conn->get_socket -> GetSocket if ssl == 1 (else ->wheel->get_input_handle)

@@ -45,9 +45,10 @@ sub _start {
   $k->post( $backend->session_id, 'register' );
 
   $backend->create_listener(
-    protocol => 4,
     bindaddr => '127.0.0.1',
     port     => 0,
+
+    foo      => 1,
   );
 }
 
@@ -129,6 +130,11 @@ sub ircsock_listener_open {
   my ($conn, $listener) = @_[ARG0 .. $#_];
 
   $got->{'got listener_open'}++;
+
+  is_deeply $conn->args, +{ foo => 1 },
+    "listener's Connector has correct args";
+  is_deeply $listener->args, $conn->args,
+    "extra args passed along ok";
 
   isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
 

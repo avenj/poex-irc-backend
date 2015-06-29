@@ -14,9 +14,13 @@ my $listener = POEx::IRC::Backend::Listener->new(
   addr  => '127.0.0.1',
   port  => 1234,
   wheel => POE::Wheel->new,
+  args  => +{ foo => 1 },
 );
 
 ok $listener->does('POEx::IRC::Backend::Role::Connector');
+
+ok $listener->has_args, 'has_args ok';
+is_deeply $listener->args, +{ foo => 1 }, 'args ok';
 
 cmp_ok $listener->idle, '==', 180, 'idle attr defaults to 180';
 $listener->set_idle(60);

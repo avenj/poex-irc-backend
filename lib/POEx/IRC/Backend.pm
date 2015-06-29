@@ -287,6 +287,7 @@ sub _accept_conn {
     )
   );
   my $this_conn = POEx::IRC::Backend::Connect->new(
+    ($listener->has_args ? (args => $listener->args) : () ),
     protocol  => $protocol,
     wheel     => $wheel,
     peeraddr  => $un_p_addr,
@@ -346,10 +347,10 @@ sub _create_listener {
   my ($kernel, $self, %args) = @_[KERNEL, OBJECT, ARG0 .. $#_];
   $args{lc $_} = delete $args{$_} for keys %args;
 
-  my $bindaddr  = $args{bindaddr} || '0.0.0.0';
-  my $bindport  = $args{port}     || 0;
+  my $bindaddr  = delete $args{bindaddr} || '0.0.0.0';
+  my $bindport  = delete $args{port}     || 0;
 
-  my $protocol = ( $args{ipv6} || ip_is_ipv6($bindaddr) ) ? 6 : 4;
+  my $protocol = ( delete($args{ipv6}) || ip_is_ipv6($bindaddr) ) ? 6 : 4;
 
   my $wheel = POE::Wheel::SocketFactory->new(
     SocketDomain => ($protocol == 6 ? AF_INET6 : AF_INET),
@@ -363,16 +364,14 @@ sub _create_listener {
 
   my $id = $wheel->ID;
 
-  # FIXME probably useful to have the same extra args behavior
-  #  as Connectors, so resultant Connects could easily be tied to their
-  #  originating Listener ->
   my $listener = POEx::IRC::Backend::Listener->new(
     protocol => $protocol,
     wheel => $wheel,
     addr  => $bindaddr,
     port  => $bindport,
-    idle  => ( $args{idle} || 180 ),
-    ssl   => ( $args{ssl}  || 0 ),
+    idle  => ( delete($args{idle}) || 180 ),
+    ssl   => ( delete($args{ssl})  || 0 ),
+    ( keys %args ? (args => \%args) : () ),
   );
 
   $self->listeners->{$id} = $listener;
@@ -962,7 +961,7 @@ attempt to establish an outgoing connection immediately.
 
 Unrecognized options are stored in the L<POEx::IRC::Backend::Connector>'s
 C<args> HASH-type attribute; this is passed to successfully created
-L<POEx::IRC::Backend::Connect> instances (as of C<v0.026>).
+L<POEx::IRC::Backend::Connect> instances (as of C<v0.26.x>).
 
 =head3 create_listener
 
@@ -977,6 +976,11 @@ L<POEx::IRC::Backend::Connect> instances (as of C<v0.026>).
 
 Attempts to create a L<POEx::IRC::Backend::Listener> 
 that holds a L<POE::Wheel::SocketFactory> listener wheel.
+
+Unrecognized arguments will be added to the Listener object's C<args>
+attribute, which is then passed on to L<POEx::IRC::Backend::Connect> objects
+created by incoming connections to that listener, similar to the behavior
+described in L</create_connector> (as of C<v0.28.x>).
 
 =head3 remove_listener
 
