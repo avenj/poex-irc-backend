@@ -269,7 +269,7 @@ sub _accept_conn {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
       $sock = POE::Component::SSLify::Server_SSLify($sock, $self->ssl_context);
     } catch {
-      warn "Could not SSLify (server) socket: $_\n";
+      warn "Could not SSLify (server) socket: $_";
       undef
     } or return;
   }
@@ -283,7 +283,7 @@ sub _accept_conn {
   );
 
   unless ($wheel) {
-    carp "Wheel creation failure in _accept_conn";
+    warn "Wheel creation failure in _accept_conn";
     return
   }
 
@@ -561,7 +561,7 @@ sub _connector_up {
   );
 
   unless ($wheel) {
-    carp "Wheel creation failure in _connector_up";
+    warn "Wheel creation failure in _connector_up";
     return
   }
 
