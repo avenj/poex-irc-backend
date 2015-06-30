@@ -159,6 +159,8 @@ sub has_zlib_support {
 
 sub spawn {
   my ($class, %args) = @_;
+  # FIXME probably ssl_opts should be an attr and settable from here for
+  # backwards-compat:
   my $ssl_opts = delete $args{ssl_opts};
   my $self = blessed $class ? $class : $class->new(%args);
 
@@ -253,24 +255,22 @@ sub _accept_conn {
   ## Accepted connection to a listener.
   my ($self, $sock, $p_addr, $p_port, $listener_id) = @_[OBJECT, ARG0 .. ARG3];
 
-  my ($un_p_addr, $protocol);
-  if ($_[STATE] eq '_accept_conn_v6') {
-    $protocol  = 6;
-    $un_p_addr = $p_addr;
-  } else {
-    $protocol  = 4;
-    $un_p_addr = get_unpacked_addr(
-      pack_sockaddr_in($p_port, $p_addr), noserv => 1
-    );
-  }
-  my $listener = $self->listeners->{$listener_id};
+  my ($protocol, $un_p_addr) = (
+    $_[STATE] eq '_accept_conn_v6' ?
+      (6, $p_addr)
+      : ( 4, 
+          get_unpacked_addr(
+            pack_sockaddr_in($p_port, $p_addr),  noserv => 1
+          )
+        )
+  );
 
-  my $really_ssl;
-  if ( $listener->ssl ) {
+  my $listener = $self->listeners->{$listener_id};
+  my $using_ssl = $listener->ssl;
+  if ($using_ssl) {
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
       $sock = POE::Component::SSLify::Server_SSLify($sock, $self->ssl_context);
-      $really_ssl = 1
     } catch {
       warn "Could not SSLify (server) socket: $_\n";
       undef
@@ -292,24 +292,26 @@ sub _accept_conn {
 
   my ($sockaddr, $sockport) = get_unpacked_addr( 
     getsockname(
-      $really_ssl ? POE::Component::SSLify::SSLify_GetSocket($sock) : $sock
+      $using_ssl ? POE::Component::SSLify::SSLify_GetSocket($sock) : $sock
     )
   );
-  my $this_conn = POEx::IRC::Backend::Connect->new(
-    ($listener->has_args ? (args => $listener->args) : () ),
-    protocol  => $protocol,
-    wheel     => $wheel,
-    peeraddr  => $un_p_addr,
-    peerport  => $p_port,
-    sockaddr  => $sockaddr,
-    sockport  => $sockport,
-    seen      => time,
-    idle      => $listener->idle,
-  );
 
-  $self->wheels->{ $wheel->ID } = $this_conn;
+  my $w_id = $wheel->ID;
+  my $this_conn = $self->wheels->{$w_id} = 
+    POEx::IRC::Backend::Connect->new(
+      ($listener->has_args ? (args => $listener->args) : () ),
+      protocol  => $protocol,
+      wheel     => $wheel,
+      peeraddr  => $un_p_addr,
+      peerport  => $p_port,
+      sockaddr  => $sockaddr,
+      sockport  => $sockport,
+      seen      => time,
+      idle      => $listener->idle,
+    );
+
   $this_conn->alarm_id(
-    $poe_kernel->delay_set( _idle_alarm => $this_conn->idle, $wheel->ID )
+    $poe_kernel->delay_set( _idle_alarm => $this_conn->idle, $w_id )
   );
 
   $poe_kernel->post( $self->controller => 
