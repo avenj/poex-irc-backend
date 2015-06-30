@@ -255,15 +255,12 @@ sub _accept_conn {
   ## Accepted connection to a listener.
   my ($self, $sock, $p_addr, $p_port, $listener_id) = @_[OBJECT, ARG0 .. ARG3];
 
-  my ($protocol, $un_p_addr) = (
-    $_[STATE] eq '_accept_conn_v6' ?
-      (6, $p_addr)
-      : ( 4, 
-          get_unpacked_addr(
-            pack_sockaddr_in($p_port, $p_addr),  noserv => 1
-          )
-        )
-  );
+  my ($protocol, $un_p_addr) = $_[STATE] eq '_accept_conn_v6' ?
+    ( 6, $p_addr )
+    : ( 4,
+        get_unpacked_addr( pack_sockaddr_in($p_port, $p_addr), noserv => 1 )
+      ) 
+  ;
 
   my $listener = $self->listeners->{$listener_id};
   my $using_ssl = $listener->ssl;
