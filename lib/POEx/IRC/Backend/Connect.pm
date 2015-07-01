@@ -5,7 +5,8 @@ use Types::Standard -all;
 
 
 use Moo;
-with 'POEx::IRC::Backend::Role::Socket';
+with 'POEx::IRC::Backend::Role::Socket',
+     'POEx::IRC::Backend::Role::CheckAvail';
 
 
 has alarm_id => (
@@ -101,6 +102,35 @@ has sockport => (
 );
 
 
+sub ssl_object {
+  my ($self) = @_;
+  return undef 
+    unless $self->ssl
+    and $self->has_ssl_support
+    and $self->has_wheel;
+
+  POE::Component::SSLify::SSLify_GetSSL( $self->wheel->get_output_handle )
+}
+
+sub ssl_cipher {
+  my ($self) = @_;
+  return ''
+    unless $self->ssl
+    and $self->has_ssl_support
+    and $self->has_wheel;
+
+  POE::Component::SSLify::SSLify_GetCipher( $self->wheel->get_output_handle )
+}
+
+sub get_socket {
+  my ($self) = @_;
+  return undef unless $self->has_wheel;
+  $self->ssl ?
+    POE::Component::SSLify::SSLify_GetSocket( $self->wheel->get_output_handle )
+    : $self->wheel->get_output_handle
+}
+
+
 1;
 
 =pod
@@ -122,15 +152,17 @@ These objects contain details regarding connected socket
 L<POE::Wheel::ReadWrite> wheels managed by 
 L<POEx::IRC::Backend>.
 
-Consumes the following roles: 
+=head2 CONSUMES
+
+This class consumes the following roles:
 
 L<POEx::IRC::Backend::Role::HasWheel>
 
 L<POEx::IRC::Backend::Role::Socket>
 
-... and adds the following attributes:
+=head2 ATTRIBUTES
 
-=head2 alarm_id
+=head3 alarm_id
 
 Connected socket wheels normally have a POE alarm ID attached for an idle 
 timer.
@@ -139,23 +171,23 @@ Predicate: C<has_alarm_id>
 
 B<rw> attribute.
 
-=head2 compressed
+=head3 compressed
 
 Boolean true if the Zlib filter has been added.
 
 See also: L<POEx::IRC::Backend/set_compressed_link>
 
-=head2 set_compressed
+=head3 set_compressed
 
 Change the boolean value of the L</compressed> attrib.
 
-=head2 idle
+=head3 idle
 
 Idle time used for connection check alarms.
 
 See also: L</ping_pending>, L<POEx::IRC::Backend/ircsock_connection_idle>
 
-=head2 is_disconnecting
+=head3 is_disconnecting
 
 Boolean false if the Connect is not in a disconnecting state; if it is 
 true, it is the disconnect message:
@@ -166,26 +198,26 @@ B<rw> attribute.
 
 See also: L<POEx::IRC::Backend/disconnect>
 
-=head2 is_client
+=head3 is_client
 
 Boolean true if the connection wheel has been marked as a client.
 
 B<rw> attribute.
 
-=head2 is_peer
+=head3 is_peer
 
 Boolean true if the connection wheel has been marked as a peer.
 
 B<rw> attribute.
 
-=head2 is_pending_compress
+=head3 is_pending_compress
 
 Primarily for internal use; boolean true if the Wheel needs a Zlib filter on
 next buffer flush.
 
 B<rw> attribute.
 
-=head2 ping_pending
+=head3 ping_pending
 
 The C<ping_pending> attribute can be used to manage standard IRC
 PING/PONG heartbeating; a server can call C<< $conn->ping_pending(1) >> upon
@@ -201,36 +233,57 @@ B<rw> attribute.
 
 See also: L<POEx::IRC::Backend/ircsock_connection_idle>
 
-=head2 peeraddr
+=head3 peeraddr
 
 The remote peer address.
 
 Writer: C<set_peeraddr>
 
-=head2 peerport
+=head3 peerport
 
 The remote peer port.
 
 Writer: C<set_peerport>
 
-=head2 seen
+=head3 seen
 
 Timestamp of last socket activity; updated by L<POEx::IRC::Backend> when
 traffic is seen from this Connect.
 
 B<rw> attribute.
 
-=head2 sockaddr
+=head3 sockaddr
 
 Our socket address.
 
 Writer: C<set_sockaddr>
 
-=head2 sockport
+=head3 sockport
 
 Our socket port.
 
 Writer: C<set_sockport>
+
+=head2 METHODS
+
+=head3 get_socket
+
+Returns the actual underlying socket handle, or undef if one is not open.
+
+If this is a SSLified socket, the real handle is retrieved via
+L<POE::Component::SSLify/SSLify_GetSocket>.
+
+=head3 ssl_cipher
+
+Returns the cipher in use by calling
+L<POE::Component::SSLify/SSLify_GetCipher>, or the empty string if this is not
+an SSLified connection.
+
+=head3 ssl_object
+
+Returns the underlying L<Net::SSLeay> object via
+L<POE::Component::SSLify/SSLify_GetSSL>, or undef if this is not an SSLified
+connection.
 
 =head1 AUTHOR
 

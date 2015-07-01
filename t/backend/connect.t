@@ -112,4 +112,6 @@ cmp_ok $conn->seen, '==', 123, 'rw seen ok';
 cmp_ok $conn->protocol, '==', 4, 'protocol ok';
 # FIXME type check tests
 
+# FIXME Role::CheckAvail tests
+
 done_testing
