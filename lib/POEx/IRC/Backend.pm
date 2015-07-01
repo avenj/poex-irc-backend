@@ -1237,6 +1237,8 @@ L<POEx::IRC::Backend::Listener>
 
 L<POEx::IRC::Backend::Role::Socket>
 
+L<POEx::IRC::Backend::Role::HasEndpoint>
+
 L<POEx::IRC::Backend::Role::HasWheel>
 
 L<POEx::IRC::Client::Lite> for an experimental IRC client library using this
