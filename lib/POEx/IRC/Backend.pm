@@ -305,6 +305,7 @@ sub _accept_conn {
       sockport  => $sockport,
       seen      => time,
       idle      => $listener->idle,
+      ssl       => $using_ssl,
     );
 
   $this_conn->alarm_id(
@@ -536,14 +537,14 @@ sub _connector_up {
   ## No need to try to connect out any more; remove from connectors pool:
   my $ct = delete $self->connectors->{$c_id};
 
-  my $really_ssl;
+  my $using_ssl;
   if ( $ct->ssl ) {
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
       $sock = POE::Component::SSLify::Client_SSLify(
         $sock, 0, 0, $self->ssl_context
       );
-      $really_ssl = 1
+      $using_ssl = 1
     } catch {
       warn "Could not SSLify (client) socket: $_\n";
       undef
@@ -567,7 +568,7 @@ sub _connector_up {
 
   my ($sockaddr, $sockport) = get_unpacked_addr(
     getsockname(
-      $really_ssl ? POE::Component::SSLify::SSLify_GetSocket($sock) : $sock
+      $using_ssl ? POE::Component::SSLify::SSLify_GetSocket($sock) : $sock
     )
   );
 
@@ -580,6 +581,7 @@ sub _connector_up {
     sockaddr => $sockaddr,
     sockport => $sockport,
     seen => time,
+    ssl  => $using_ssl,
   );
 
   $self->wheels->{ $wheel->ID } = $this_conn;

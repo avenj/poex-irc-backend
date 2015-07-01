@@ -3,22 +3,11 @@ package POEx::IRC::Backend::Role::Socket;
 use Moo::Role;
 with 'POEx::IRC::Backend::Role::HasWheel';
 
-has addr => (
-  required => 1,
-  is       => 'ro',
-);
-
 has args => (
   lazy      => 1,
   is        => 'ro',
   predicate => 1,
   default   => sub { +{} },
-);
-
-has port => (
-  required => 1,
-  is       => 'ro',
-  writer   => 'set_port',
 );
 
 has protocol => (
@@ -41,23 +30,16 @@ has ssl => (
 
 POEx::IRC::Backend::Role::Socket - IRC socket connector behavior
 
-=head1 SYNOPSIS
-
-A L<Moo::Role> defining some basic common attributes for listening/connecting
-sockets.
-
 =head1 DESCRIPTION
 
-This role is consumed by L<POEx::IRC::Backend::Connector> and 
-L<POEx::IRC::Backend::Listener> objects; it defines some basic attributes
-shared by listening/connecting sockets.
+A role defining some basic attributes shared by L<POEx::IRC::Backend> sockets.
+
+This role is consumed by L<POEx::IRC::Backend::Connect>,
+L<POEx::IRC::Backend::Connector>, and 
+L<POEx::IRC::Backend::Listener> objects.
 
 This role consumes L<POEx::IRC::Backend::Role::HasWheel> and adds the
 following attributes:
-
-=head2 addr
-
-The local address we are bound to.
 
 =head2 args
 
@@ -68,24 +50,23 @@ L<POEx::IRC::Backend::Connect>.
 
 Predicate: B<has_args>
 
-=head2 port
-
-The local port we are listening on.
-
-=head2 set_port
-
-Change the current port attribute.
-
-This won't trigger any automatic Wheel changes (at this time), 
-but it is useful when creating a listener on port 0.
-
 =head2 protocol
 
 The Internet protocol version for this listener (4 or 6).
 
+(For L<POEx::IRC::Backend>-produced objects, this is set automatically.)
+
 =head2 ssl
 
 Boolean value indicating whether connections should be SSLified.
+
+(For L<POEx::IRC::Backend>-produced objects, this is set automatically.)
+
+=head1 SEE ALSO
+
+L<POEx::IRC::Backend::Role::HasWheel>
+
+L<POEx::IRC::Backend::Role::HasEndpoint>
 
 =head1 AUTHOR
 
