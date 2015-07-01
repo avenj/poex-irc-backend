@@ -1,6 +1,9 @@
 use Test::More;
 use strict; use warnings FATAL => 'all';
 
+# FIXME inline these tests into class-specific tests so we're role-agnostic,
+#  then kill this
+
 { package
     Testing::Role::Socket;
   use Moo;

@@ -25,6 +25,8 @@
     -(DONE) consume Role::HasEndpoint from Connector.pm / Listener.pm
     -(DONE) consume Role::Socket from Connect.pm
     - audit tests
+      - t/backend/role/ should go away
+      - t/backend/connect.t is incomplete
 
 # Expose more SSLify functions
   - $conn->ssl_object -> GetSSL (or undef if ssl == 0)
