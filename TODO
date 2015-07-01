@@ -1,8 +1,10 @@
 (loosely priority-ordered)
 
 # Test improvements.
+  - t/backend/connect.t is incomplete
+  - t/backend/role is deprecated, should be inlined to class-specific
+    tests and removed
   - disconnect behavior ('disconnect' branch)
-  - SSL (if SSLify present)
   - peer-to-peer zlib
 
 # Optional idle timer for outgoing Connector-spawned Connects.
@@ -16,19 +18,3 @@
 
 # IP blacklisting for Listeners
   - per-backend and/or per-listener
-
-# Rethink roles a bit;
-  - Currently Connectors and Listeners consume Role::Socket but Connects do not.
-    Connects do have their own ->protocol and ->args matching Role::Socket,
-    and could make use of ->ssl
-    -(DONE) move addr/port out of Role::Socket to Role::HasEndpoint
-    -(DONE) consume Role::HasEndpoint from Connector.pm / Listener.pm
-    -(DONE) consume Role::Socket from Connect.pm
-    - audit tests
-      - t/backend/role/ should go away
-      - t/backend/connect.t is incomplete
-
-# Expose more SSLify functions
-  - $conn->ssl_object -> GetSSL (or undef if ssl == 0)
-  - $conn->ssl_cipher -> GetCipher (or '' if ssl == 0)
-  - $conn->get_socket -> GetSocket if ssl == 1 (else ->wheel->get_input_handle)
