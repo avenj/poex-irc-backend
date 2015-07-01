@@ -103,14 +103,7 @@ sub ircsock_connector_open {
   my ($k, $backend) = @_[KERNEL, HEAP];
   my $conn = $_[ARG0];
 
-  ## OK, technically a Connector that acts like a client
-  ## ought to have a backend with a 'colonify => 0' filter
-
   $got->{'got connector_open'}++;
-
-  diag "GetCipher: ".POE::Component::SSLify::SSLify_GetCipher(
-    $conn->wheel->get_input_handle
-  );
 
   isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
   is_deeply $conn->args, +{ tag => 'foo' },
@@ -170,9 +163,16 @@ sub ircsock_listener_open {
   );
 }
 
+my $ssl_checked = 0;
 sub ircsock_input {
   my ($k, $backend) = @_[KERNEL, HEAP];
   my ($conn, $ev)   = @_[ARG0 .. $#_];
+
+  my $cipher = POE::Component::SSLify::SSLify_GetCipher(
+    $conn->wheel->get_output_handle
+  );
+  cmp_ok $cipher, 'ne', '(NONE)', 'SSL enabled on handle';
+  diag "GetCipher: $cipher" unless $ssl_checked++;
 
   isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
   isa_ok( $ev, 'IRC::Message::Object' );
@@ -180,8 +180,6 @@ sub ircsock_input {
   if ($ev->params->[0] eq 'testing') {
     $got->{'got ircsock_input'}++;
   }
-
-  ## FIXME test ->disconnect() behavior with both blessed wheel & ID
 
   if ($got->{'got ircsock_input'} == $expected->{'got ircsock_input'}) {
     ## Call for a listener removal to test listener_removed
