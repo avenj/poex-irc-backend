@@ -1,9 +1,12 @@
 package POEx::IRC::Backend::Connect;
 
+use strictures 2;
 use Types::Standard -all;
+
 
 use Moo;
 with 'POEx::IRC::Backend::Role::Socket';
+
 
 has alarm_id => (
   ## Idle alarm ID.
@@ -12,7 +15,6 @@ has alarm_id => (
   predicate => 'has_alarm_id',
   default   => sub { 0 },
 );
-
 
 has compressed => (
   ## zlib filter added.
@@ -23,7 +25,6 @@ has compressed => (
   default => sub { !!0 },
 );
 
-
 has idle => (
   ## Idle delay.
   lazy    => 1,
@@ -32,14 +33,12 @@ has idle => (
   default => sub { 180 },
 );
 
-
 has is_client => (
   lazy    => 1,
   is      => 'rw',
   isa     => Bool,
   default => sub { !!0 },
 );
-
 
 has is_peer => (
   lazy    => 1,
@@ -48,14 +47,12 @@ has is_peer => (
   default => sub { !!0 },
 );
 
-
 has is_disconnecting => (
   ## Bool or string (disconnect message)
   is      => 'rw',
   isa     => (Bool | Str),
   default => sub { !!0 },
 );
-
 
 has is_pending_compress => (
   ## Wheel needs zlib filter after a socket flush.
@@ -64,14 +61,12 @@ has is_pending_compress => (
   default => sub { !!0 },
 );
 
-
 has peeraddr => (
   required => 1,
   isa      => Str,
   is       => 'ro',
   writer   => 'set_peeraddr',
 );
-
 
 has peerport => (
   required => 1,
@@ -92,14 +87,12 @@ has seen => (
   default => sub { 0 },
 );
 
-
 has sockaddr => (
   required => 1,
   isa      => Str,
   is       => 'ro',
   writer   => 'set_sockaddr',
 );
-
 
 has sockport => (
   required => 1,
