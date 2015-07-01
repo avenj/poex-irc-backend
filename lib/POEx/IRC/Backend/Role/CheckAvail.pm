@@ -26,3 +26,7 @@ sub has_zlib_support {
 
 
 1;
+
+=for Pod::Coverage .*
+
+=cut
