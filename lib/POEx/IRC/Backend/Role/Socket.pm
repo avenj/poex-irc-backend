@@ -54,11 +54,17 @@ Predicate: B<has_args>
 
 The Internet protocol version for this listener (4 or 6).
 
+(For L<POEx::IRC::Backend>-produced objects, this is set automatically.)
+
 =head2 ssl
 
 Boolean value indicating whether connections should be SSLified.
 
+(For L<POEx::IRC::Backend>-produced objects, this is set automatically.)
+
 =head1 SEE ALSO
+
+L<POEx::IRC::Backend::Role::HasWheel>
 
 L<POEx::IRC::Backend::Role::HasEndpoint>
 
