@@ -6,14 +6,26 @@
   - peer-to-peer zlib
 
 # Optional idle timer for outgoing Connector-spawned Connects.
+  - currently an idle timer only runs for Connects spawned by Listeners
+    (which fits the standard server PING -> client PONG dialog) but not those
+    set up by an outgoing connector, which may be useful for some users; at the very
+    least it should be clearly documented how to emulate this on the controller side
 
 # Optionally skip ircmsg() and dispatch raw events from _ircsock_input
+  - attr 'dispatch' isa Enum[qw/raw ircmsg/] & default to 'ircmsg' ?
 
 # IP blacklisting for Listeners
   - per-backend and/or per-listener
 
+# Rethink roles a bit;
+  - Currently Connectors and Listeners consume Role::Socket but Connects do not.
+    Connects do have their own ->protocol and ->args matching Role::Socket,
+    and could make use of ->ssl
+    - move addr/port out of Role::Socket to Role::HasEndpoint
+    - consume Role::HasEndpoint from Connector.pm / Listener.pm
+    - consume Role::Socket from Connect.pm
+
 # Expose more SSLify functions
-  - Role for Connects ?
   - $conn->ssl_object -> GetSSL (or undef if ssl == 0)
   - $conn->ssl_cipher -> GetCipher (or '' if ssl == 0)
   - $conn->get_socket -> GetSocket if ssl == 1 (else ->wheel->get_input_handle)
