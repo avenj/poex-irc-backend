@@ -107,6 +107,10 @@ sub ircsock_connector_open {
   $backend->send( ircmsg( raw_line => ':test CONNECTOR :testing' ),
     $conn
   );
+
+  ok $conn->get_socket, 'get_socket ok';
+  cmp_ok $conn->ssl_cipher, 'eq', '', 'ssl_cipher returns empty string ok';
+  ok !$conn->ssl_object, '! ssl_object ok';
 }
 
 sub ircsock_listener_removed {
