@@ -23,7 +23,7 @@
     and could make use of ->ssl
     -(DONE) move addr/port out of Role::Socket to Role::HasEndpoint
     -(DONE) consume Role::HasEndpoint from Connector.pm / Listener.pm
-    - consume Role::Socket from Connect.pm
+    -(DONE) consume Role::Socket from Connect.pm
     - audit tests
 
 # Expose more SSLify functions

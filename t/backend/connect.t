@@ -71,10 +71,6 @@ ok $conn->compressed, 'set_compressed ok';
 # (rw) ping_pending
 # FIXME
 
-# protocol
-cmp_ok $conn->protocol, '==', 4, 'protocol ok';
-# FIXME type check tests
-
 # (rw) seen
 cmp_ok $conn->seen, '==', 0, 'default seen ok';
 $conn->seen(123);
@@ -106,5 +102,14 @@ cmp_ok $conn->seen, '==', 123, 'rw seen ok';
 
 # sockport required
 # FIXME
+
+# FIXME Role::Socket bits ->
+# args
+# FIXME
+# ssl
+# FIXME
+# protocol
+cmp_ok $conn->protocol, '==', 4, 'protocol ok';
+# FIXME type check tests
 
 done_testing

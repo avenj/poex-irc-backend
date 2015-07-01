@@ -3,14 +3,7 @@ package POEx::IRC::Backend::Connect;
 use Types::Standard -all;
 
 use Moo;
-with 'POEx::IRC::Backend::Role::HasWheel';
-
-has args => (
-  lazy      => 1,
-  is        => 'ro',
-  predicate => 1,
-  default   => sub { +{} },
-);
+with 'POEx::IRC::Backend::Role::Socket';
 
 has alarm_id => (
   ## Idle alarm ID.
@@ -92,14 +85,6 @@ has ping_pending => (
   default => sub { 0 },
 );
 
-has protocol => (
-  ## 4 or 6.
-  required => 1,
-  is       => 'ro',
-  isa      => StrictNum,
-);
-
-
 has seen => (
   ## TS of last activity on this Connect.
   lazy    => 1,
@@ -144,8 +129,13 @@ These objects contain details regarding connected socket
 L<POE::Wheel::ReadWrite> wheels managed by 
 L<POEx::IRC::Backend>.
 
-Consumes L<POEx::IRC::Backend::Role::HasWheel> and adds the following
-attributes:
+Consumes the following roles: 
+
+L<POEx::IRC::Backend::Role::HasWheel>
+
+L<POEx::IRC::Backend::Role::Socket>
+
+... and adds the following attributes:
 
 =head2 alarm_id
 
@@ -155,14 +145,6 @@ timer.
 Predicate: C<has_alarm_id>
 
 B<rw> attribute.
-
-=head2 args
-
-Arbitrary metadata attached to this connection; by default, any C<args>
-attached to a L<POEx::IRC::Backend::Connector> that spawns a
-L<POEx::IRC::Backend::Connect> are passed along.
-
-Predicate: B<has_args>
 
 =head2 compressed
 
@@ -237,10 +219,6 @@ Writer: C<set_peeraddr>
 The remote peer port.
 
 Writer: C<set_peerport>
-
-=head2 protocol
-
-The protocol in use (4 or 6); set by L<POEx::IRC::Backend> at connection time.
 
 =head2 seen
 
