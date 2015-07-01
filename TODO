@@ -1,9 +1,6 @@
 (loosely priority-ordered)
 
 # Test improvements.
-  - t/backend/connect.t is incomplete
-  - t/backend/role is deprecated, should be inlined to class-specific
-    tests and removed
   - disconnect behavior ('disconnect' branch)
   - peer-to-peer zlib
 

@@ -69,7 +69,9 @@ $conn->set_compressed(1);
 ok $conn->compressed, 'set_compressed ok';
 
 # (rw) ping_pending
-# FIXME
+ok !$conn->ping_pending, 'default ping_pending false ok';
+$conn->ping_pending(1);
+ok $conn->ping_pending, 'rw ping_pending ok';
 
 # (rw) seen
 cmp_ok $conn->seen, '==', 0, 'default seen ok';
@@ -77,31 +79,90 @@ $conn->seen(123);
 cmp_ok $conn->seen, '==', 123, 'rw seen ok';
 
 # peeraddr / set_peeraddr
-# FIXME
+cmp_ok $conn->peeraddr, 'eq', 'foo', 'peeraddr ok';
+$conn->set_peeraddr('bar');
+cmp_ok $conn->peeraddr, 'eq', 'bar', 'set_peeraddr ok';
 
 # peerport / set_peerport
-# FIXME
+cmp_ok $conn->peerport, '==', 123, 'peerport ok';
+$conn->set_peerport(321);
+cmp_ok $conn->peerport, '==', 321, 'set_peerport ok';
 
 # sockaddr / set_sockaddr
-# FIXME
+cmp_ok $conn->sockaddr, 'eq', 'bar', 'sockaddr ok';
+$conn->set_sockaddr('foo');
+cmp_ok $conn->sockaddr, 'eq', 'foo', 'set_sockaddr ok';
 
 # sockport / set_sockport
-# FIXME
+cmp_ok $conn->sockport, '==', 456, 'sockport ok';
+$conn->set_sockport(654);
+cmp_ok $conn->sockport, '==', 654, 'set_sockport ok';
 
 # peeraddr required
-# FIXME
+eval {;
+  POEx::IRC::Backend::Connect->new(
+    args      => +{ tag => 'foo' },
+    wheel     => POE::Wheel->new,
+    protocol  => 4,
+    peerport  => '123',
+    sockaddr  => 'bar',
+    sockport  => '456',
+  );
+};
+like $@, qr/peeraddr/, 'missing peeraddr dies';
 
 # peerport required
-# FIXME
+eval {;
+  POEx::IRC::Backend::Connect->new(
+    args      => +{ tag => 'foo' },
+    wheel     => POE::Wheel->new,
+    protocol  => 4,
+    peeraddr  => '123',
+    sockaddr  => 'bar',
+    sockport  => '456',
+  );
+};
+like $@, qr/peerport/, 'missing peerport dies';
 
 # protocol required
-# FIXME
+eval {;
+  POEx::IRC::Backend::Connect->new(
+    args      => +{ tag => 'foo' },
+    wheel     => POE::Wheel->new,
+    peeraddr  => '123',
+    peerport  => '1234',
+    sockaddr  => 'bar',
+    sockport  => '456',
+  );
+};
+like $@, qr/protocol/, 'missing protocol dies';
 
 # sockaddr required
-# FIXME
+eval {;
+  POEx::IRC::Backend::Connect->new(
+    args      => +{ tag => 'foo' },
+    wheel     => POE::Wheel->new,
+    protocol  => 4,
+    peeraddr  => '123',
+    peerport  => '1234',
+    sockport  => '456',
+  );
+};
+like $@, qr/sockaddr/, 'missing sockaddr dies';
 
 # sockport required
-# FIXME
+eval {;
+  POEx::IRC::Backend::Connect->new(
+    args      => +{ tag => 'foo' },
+    wheel     => POE::Wheel->new,
+    protocol  => 4,
+    peeraddr  => '123',
+    peerport  => '1234',
+    sockaddr  => 'bar',
+  );
+};
+like $@, qr/sockport/, 'missing sockport dies';
+
 
 # FIXME Role::Socket bits ->
 # args
