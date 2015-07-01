@@ -3,7 +3,9 @@ use strict; use warnings FATAL => 'all';
 
 { package
     Testing::Role::Socket;
-  use Moo; with 'POEx::IRC::Backend::Role::Socket';
+  use Moo;
+  with 'POEx::IRC::Backend::Role::Socket',
+       'POEx::IRC::Backend::Role::HasEndpoint';
 }
 
 { package

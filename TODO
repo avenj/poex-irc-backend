@@ -21,9 +21,10 @@
   - Currently Connectors and Listeners consume Role::Socket but Connects do not.
     Connects do have their own ->protocol and ->args matching Role::Socket,
     and could make use of ->ssl
-    - move addr/port out of Role::Socket to Role::HasEndpoint
-    - consume Role::HasEndpoint from Connector.pm / Listener.pm
+    -(DONE) move addr/port out of Role::Socket to Role::HasEndpoint
+    -(DONE) consume Role::HasEndpoint from Connector.pm / Listener.pm
     - consume Role::Socket from Connect.pm
+    - audit tests
 
 # Expose more SSLify functions
   - $conn->ssl_object -> GetSSL (or undef if ssl == 0)

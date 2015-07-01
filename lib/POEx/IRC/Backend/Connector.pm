@@ -1,7 +1,8 @@
 package POEx::IRC::Backend::Connector;
 
 use Moo;
-with 'POEx::IRC::Backend::Role::Socket';
+with 'POEx::IRC::Backend::Role::Socket',
+     'POEx::IRC::Backend::Role::HasEndpoint';
 
 has bindaddr => (
   lazy      => 1,
@@ -20,17 +21,18 @@ has bindaddr => (
 
 POEx::IRC::Backend::Connector - An outgoing IRC socket connector
 
-=head1 SYNOPSIS
-
-Created by L<POEx::IRC::Backend> for outgoing connector sockets.
-
 =head1 DESCRIPTION
 
 These objects contain details regarding 
 L<POEx::IRC::Backend> outgoing connector sockets.
 
-This class consumes L<POEx::IRC::Backend::Role::Socket> and adds the
-following attributes:
+This class consumes the following roles:
+
+L<POEx::IRC::Backend::Role::Socket>
+
+L<POEx::IRC::Backend::Role::HasEndpoint>
+
+... and adds the following attributes:
 
 =head2 bindaddr
 
