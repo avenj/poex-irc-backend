@@ -172,7 +172,13 @@ sub ircsock_input {
     $conn->wheel->get_output_handle
   );
   cmp_ok $cipher, 'ne', '(NONE)', 'SSL enabled on handle';
-  diag "GetCipher: $cipher" unless $ssl_checked++;
+  unless ($ssl_checked++) {
+    diag "GetCipher: $cipher";
+    cmp_ok $conn->ssl_cipher, 'eq', $cipher, 'ssl_cipher ok';
+    ok $conn->ssl_object, 'ssl_object ok';
+    diag Net::SSLeay::dump_peer_certificate( $conn->ssl_object );
+    ok $conn->get_socket, 'sslified get_socket ok';
+  }
 
   isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
   isa_ok( $ev, 'IRC::Message::Object' );
