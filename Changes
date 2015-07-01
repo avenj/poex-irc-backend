@@ -1,5 +1,16 @@
 # Changes for POEx::IRC::Backend
 
+0.029001 2015-07-01
+
+  - Connect objects now provide 'get_socket' / 'ssl_cipher' / 'ssl_object'
+
+  - Role reorganization; addr/port attributes moved to Role::HasEndpoint,
+    Connect objects consume Role::Socket
+
+  - Various optimizations
+
+  - Test suite expansion
+
 0.028001 2015-06-29
 
   - Stop using the global POE::Component::SSLify context, maintain

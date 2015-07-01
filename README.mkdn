@@ -438,6 +438,8 @@ Zlib and SSL are mostly untested.
 
 [POEx::IRC::Backend::Role::Socket](https://metacpan.org/pod/POEx::IRC::Backend::Role::Socket)
 
+[POEx::IRC::Backend::Role::HasEndpoint](https://metacpan.org/pod/POEx::IRC::Backend::Role::HasEndpoint)
+
 [POEx::IRC::Backend::Role::HasWheel](https://metacpan.org/pod/POEx::IRC::Backend::Role::HasWheel)
 
 [POEx::IRC::Client::Lite](https://metacpan.org/pod/POEx::IRC::Client::Lite) for an experimental IRC client library using this
