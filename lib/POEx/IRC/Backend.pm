@@ -234,72 +234,6 @@ sub _register_controller {
   $kernel->post( $self->controller => ircsock_registered => $self );
 }
 
-sub _accept_conn {
-  ## Accepted connection to a listener.
-  my ($self, $sock, $p_addr, $p_port, $listener_id) = @_[OBJECT, ARG0 .. ARG3];
-
-  my ($protocol, $un_p_addr) = $_[STATE] eq '_accept_conn_v6' ?
-    ( 6, $p_addr )
-    : ( 4,
-        get_unpacked_addr( pack_sockaddr_in($p_port, $p_addr), noserv => 1 )
-      ) 
-  ;
-
-  my $listener = $self->listeners->{$listener_id};
-  my $using_ssl = $listener->ssl;
-  if ($using_ssl) {
-    try {
-      die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
-      $sock = POE::Component::SSLify::Server_SSLify($sock, $self->ssl_context);
-    } catch {
-      warn "Could not SSLify (server) socket: $_";
-      undef
-    } or return;
-  }
-
-  my $wheel = POE::Wheel::ReadWrite->new(
-    Handle => $sock,
-    Filter => $self->filter,
-    InputEvent   => '_ircsock_input',
-    ErrorEvent   => '_ircsock_error',
-    FlushedEvent => '_ircsock_flushed',
-  );
-
-  unless ($wheel) {
-    warn "Wheel creation failure in _accept_conn";
-    return
-  }
-
-  my ($sockaddr, $sockport) = get_unpacked_addr( 
-    getsockname(
-      $using_ssl ? POE::Component::SSLify::SSLify_GetSocket($sock) : $sock
-    )
-  );
-
-  my $w_id = $wheel->ID;
-  my $this_conn = $self->wheels->{$w_id} = 
-    POEx::IRC::Backend::Connect->new(
-      ($listener->has_args ? (args => $listener->args) : () ),
-      protocol  => $protocol,
-      wheel     => $wheel,
-      peeraddr  => $un_p_addr,
-      peerport  => $p_port,
-      sockaddr  => $sockaddr,
-      sockport  => $sockport,
-      seen      => time,
-      idle      => $listener->idle,
-      ssl       => $using_ssl,
-    );
-
-  $this_conn->alarm_id(
-    $poe_kernel->delay_set( _idle_alarm => $this_conn->idle, $w_id )
-  );
-
-  $poe_kernel->post( $self->controller => 
-    ircsock_listener_open => $this_conn, $listener
-  );
-}
-
 sub _idle_alarm {
   my ($kernel, $self, $w_id) = @_[KERNEL, OBJECT, ARG0];
   my $this_conn = $self->wheels->{$w_id} || return;
@@ -310,22 +244,6 @@ sub _idle_alarm {
     $kernel->delay_set( _idle_alarm => $this_conn->idle, $w_id )
   );
 }
-
-sub _accept_fail {
-  my ($kernel, $self) = @_[KERNEL, OBJECT];
-  my ($op, $errnum, $errstr, $listener_id) = @_[ARG0 .. ARG3];
-
-  my $listener = delete $self->listeners->{$listener_id};
-
-  if ($listener) {
-    $listener->clear_wheel;
-
-    $kernel->post( $self->controller => 
-      ircsock_listener_failure => $listener, $op, $errnum, $errstr
-    );
-  }
-}
-
 
 sub create_listener {
   my $self = shift;
@@ -428,6 +346,87 @@ sub _remove_listener {
       ircsock_listener_removed => $listener 
     );
   }
+}
+
+sub _accept_fail {
+  my ($kernel, $self) = @_[KERNEL, OBJECT];
+  my ($op, $errnum, $errstr, $listener_id) = @_[ARG0 .. ARG3];
+
+  my $listener = delete $self->listeners->{$listener_id};
+
+  if ($listener) {
+    $listener->clear_wheel;
+
+    $kernel->post( $self->controller => 
+      ircsock_listener_failure => $listener, $op, $errnum, $errstr
+    );
+  }
+}
+
+sub _accept_conn {
+  ## Accepted connection to a listener.
+  my ($self, $sock, $p_addr, $p_port, $listener_id) = @_[OBJECT, ARG0 .. ARG3];
+
+  my ($protocol, $un_p_addr) = $_[STATE] eq '_accept_conn_v6' ?
+    ( 6, $p_addr )
+    : ( 4,
+        get_unpacked_addr( pack_sockaddr_in($p_port, $p_addr), noserv => 1 )
+      ) 
+  ;
+
+  my $listener = $self->listeners->{$listener_id};
+  my $using_ssl = $listener->ssl;
+  if ($using_ssl) {
+    try {
+      die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
+      $sock = POE::Component::SSLify::Server_SSLify($sock, $self->ssl_context);
+    } catch {
+      warn "Could not SSLify (server) socket: $_";
+      undef
+    } or return;
+  }
+
+  my $wheel = POE::Wheel::ReadWrite->new(
+    Handle => $sock,
+    Filter => $self->filter,
+    InputEvent   => '_ircsock_input',
+    ErrorEvent   => '_ircsock_error',
+    FlushedEvent => '_ircsock_flushed',
+  );
+
+  unless ($wheel) {
+    warn "Wheel creation failure in _accept_conn";
+    return
+  }
+
+  my ($sockaddr, $sockport) = get_unpacked_addr( 
+    getsockname(
+      $using_ssl ? POE::Component::SSLify::SSLify_GetSocket($sock) : $sock
+    )
+  );
+
+  my $w_id = $wheel->ID;
+  my $this_conn = $self->wheels->{$w_id} = 
+    POEx::IRC::Backend::Connect->new(
+      ($listener->has_args ? (args => $listener->args) : () ),
+      protocol  => $protocol,
+      wheel     => $wheel,
+      peeraddr  => $un_p_addr,
+      peerport  => $p_port,
+      sockaddr  => $sockaddr,
+      sockport  => $sockport,
+      seen      => time,
+      idle      => $listener->idle,
+      ssl       => $using_ssl,
+    );
+
+  $this_conn->alarm_id(
+    $poe_kernel->delay_set( _idle_alarm => $this_conn->idle, $w_id )
+  );
+
+  $poe_kernel->post( $self->controller => 
+    ircsock_listener_open => $this_conn, $listener
+  );
 }
 
 sub create_connector {
