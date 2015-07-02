@@ -20,7 +20,6 @@ use POEx::IRC::Backend;
 use IRC::Message::Object 'ircmsg';
 
 my $expected = {
-  'got registered'       => 1,
   'got listener_created' => 1,
   'got connector_open'   => 1,
   'got listener_open'    => 1,
@@ -35,7 +34,6 @@ POE::Session->create(
     main => [ qw/
       _start
       shutdown
-      ircsock_registered
 
       ircsock_connector_open
       ircsock_listener_created
@@ -77,18 +75,11 @@ sub shutdown {
   }
 }
 
-sub ircsock_registered {
-  $got->{'got registered'}++;
-  isa_ok( $_[ARG0], 'POEx::IRC::Backend' );
-}
-
 sub ircsock_listener_created {
   my ($k, $backend) = @_[KERNEL, HEAP];
   my $listener = $_[ARG0];
 
   $got->{'got listener_created'}++;
-
-  isa_ok( $listener, 'POEx::IRC::Backend::Listener' );
   ok $listener->ssl, 'SSL enabled';
 
   $backend->create_connector(
@@ -104,8 +95,6 @@ sub ircsock_connector_open {
   my $conn = $_[ARG0];
 
   $got->{'got connector_open'}++;
-
-  isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
   is_deeply $conn->args, +{ tag => 'foo' },
     'args passed along ok';
 
@@ -128,8 +117,6 @@ sub ircsock_listener_removed {
   my ($k, $backend) = @_[KERNEL, HEAP];
   my $listener = $_[ARG0];
 
-  isa_ok( $listener, 'POEx::IRC::Backend::Listener' );
-
   $got->{'got listener_removed'}++;
 
   $k->yield( shutdown => 1 )
@@ -150,8 +137,6 @@ sub ircsock_listener_open {
     "listener's Connector has correct args";
   is_deeply $listener->args, $conn->args,
     "extra args passed along ok";
-
-  isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
 
   $backend->send(
     ircmsg(
