@@ -142,6 +142,13 @@ sub ircsock_listener_open {
 
   isa_ok( $conn, 'POEx::IRC::Backend::Connect' );
 
+  cmp_ok $conn->sockaddr, 'eq', '127.0.0.1', 'sockaddr ok';
+  cmp_ok $conn->sockport, '==', $listener->port, 'sockport ok';
+  cmp_ok $conn->peeraddr, 'eq', '127.0.0.1', 'peeraddr ok';
+  ok $conn->peerport, 'peerport ok';
+  ok !$conn->is_disconnecting, 'is_disconnecting ok';
+  ok !$conn->compressed, 'compressed ok';
+
   $backend->send(
     ircmsg(
       prefix  => 'listener',
