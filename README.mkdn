@@ -213,11 +213,16 @@ You can avoid spurious warnings by checking if the
       $backend->disconnect( $this_conn )
     }
 
-Note that disconnection happens after a buffer flush; if your software does
-not perform entirely like a traditional platform (server implementations
-will typically send `ERROR: Closing Link` or similar to clients marked
-for disconnection, which will trigger a buffer flush) you may currently experience
-"late" disconnects. This behavior may be subject to change in future versions.
+Note that disconnection typically happens after a buffer flush; if your
+software does not perform entirely like a traditional platform (server
+implementations will typically send `ERROR: Closing Link` or similar to
+clients marked for disconnection, which will trigger a buffer flush) you may
+currently experience "late" disconnects. See ["disconnect\_now"](#disconnect_now).
+
+### disconnect\_now
+
+Like ["disconnect"](#disconnect), but attempt to destroy the wheel immediately (without
+waiting for a buffer flush).
 
 ### send
 
@@ -422,11 +427,9 @@ means of acknowledging the controlling session.
 
 # BUGS
 
-Probably lots. Please report them via RT, e-mail, or GitHub
+Probably lots. Please report them via RT, e-mail, IRC
+(`irc.cobaltirc.org#perl`), or GitHub
 ([http://github.com/avenj/poex-irc-backend](http://github.com/avenj/poex-irc-backend)).
-
-Tests are a bit incomplete, as of this writing. 
-Zlib and SSL are mostly untested.
 
 # SEE ALSO
 

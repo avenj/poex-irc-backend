@@ -1,5 +1,12 @@
 # Changes for POEx::IRC::Backend
 
+0.030001 2015-07-02
+
+  - Fix Connector SSL (broken in 0.28.1)
+
+  - Add 'disconnect_now' method to terminate sockets without waiting for a
+    buffer flush
+
 0.029001 2015-07-01
 
   - Connect objects now provide 'get_socket' / 'ssl_cipher' / 'ssl_object'
