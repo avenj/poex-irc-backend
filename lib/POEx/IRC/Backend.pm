@@ -1004,11 +1004,16 @@ L<POEx::IRC::Backend::Connect> still has an active wheel attached:
     $backend->disconnect( $this_conn )
   }
 
-Note that disconnection happens after a buffer flush; if your software does
-not perform entirely like a traditional platform (server implementations
-will typically send C<< ERROR: Closing Link >> or similar to clients marked
-for disconnection, which will trigger a buffer flush) you may currently experience
-"late" disconnects. This behavior may be subject to change in future versions.
+Note that disconnection typically happens after a buffer flush; if your
+software does not perform entirely like a traditional platform (server
+implementations will typically send C<< ERROR: Closing Link >> or similar to
+clients marked for disconnection, which will trigger a buffer flush) you may
+currently experience "late" disconnects. See L</disconnect_now>.
+
+=head3 disconnect_now
+
+Like L</disconnect>, but attempt to destroy the wheel immediately (without
+waiting for a buffer flush).
 
 =head3 send
 
