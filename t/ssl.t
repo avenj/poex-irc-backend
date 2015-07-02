@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use Test::More;
-use strict; use warnings FATAL => 'all';
+use strict; use warnings;
 
 
 my $key_path = 't/inc/test.key';

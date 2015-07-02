@@ -1,5 +1,5 @@
 use Test::More;
-use strict; use warnings FATAL => 'all';
+use strict; use warnings;
 
 use POEx::IRC::Backend::Connect;
 
