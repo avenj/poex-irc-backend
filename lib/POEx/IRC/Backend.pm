@@ -506,7 +506,7 @@ sub _connector_up {
     try {
       die "Failed to load POE::Component::SSLify" unless $self->has_ssl_support;
       $sock = POE::Component::SSLify::Client_SSLify(
-        $sock, 0, 0, $self->ssl_context
+        $sock, undef, undef, $self->ssl_context
       );
       $using_ssl = 1
     } catch {
