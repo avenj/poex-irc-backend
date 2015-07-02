@@ -10,8 +10,5 @@
     set up by an outgoing connector, which may be useful for some users; at the very
     least it should be clearly documented how to emulate this on the controller side
 
-# Optionally skip ircmsg() and dispatch raw events from _ircsock_input
-  - attr 'dispatch' isa Enum[qw/raw ircmsg/] & default to 'ircmsg' ?
-
 # IP blacklisting for Listeners
   - per-backend and/or per-listener

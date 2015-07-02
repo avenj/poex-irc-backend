@@ -576,7 +576,6 @@ sub _ircsock_input {
   $poe_kernel->delay_adjust( $this_conn->alarm_id, $this_conn->idle )
     if $this_conn->has_alarm_id;
 
-  ## FIXME configurable raw events?
   $poe_kernel->post( $_[OBJECT]->controller => 
     ircsock_input => $this_conn, IRC::Message::Object->new(%{ $_[ARG0] })
   );
