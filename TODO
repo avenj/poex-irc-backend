@@ -1,14 +1,8 @@
 (loosely priority-ordered)
 
 # Test improvements.
-  - disconnect behavior ('disconnect' branch)
+  - disconnect behavior (check stash)
   - peer-to-peer zlib
-
-# Optional idle timer for outgoing Connector-spawned Connects.
-  - currently an idle timer only runs for Connects spawned by Listeners
-    (which fits the standard server PING -> client PONG dialog) but not those
-    set up by an outgoing connector, which may be useful for some users; at the very
-    least it should be clearly documented how to emulate this on the controller side
 
 # IP blacklisting for Listeners
   - per-backend and/or per-listener

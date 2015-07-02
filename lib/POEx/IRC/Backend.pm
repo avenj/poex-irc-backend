@@ -1129,8 +1129,7 @@ These events are dispatched to the controller session; see L</register>.
 
 Dispatched when a connection wheel has had a compression filter added.
 
-C<$_[ARG0]> is the connection's 
-L<POEx::IRC::Backend::Connect>
+C<$_[ARG0]> is the connection's L<POEx::IRC::Backend::Connect>.
 
 =head3 ircsock_connection_idle
 
@@ -1138,10 +1137,11 @@ Dispatched when a connection wheel has had no input for longer than
 specified idle time (see L</create_listener> regarding idle times).
 
 Currently these events are only issued for incoming Connects accepted on a
-Listener, not outgoing Connects created by a Connector.
+Listener, not outgoing Connects created by a Connector; if you need to do
+ping/pong-style heartbeating on an outgoing Connector-spawned socket, you will
+need to run your own timer.
 
-C<$_[ARG0]> is the connection's 
-L<POEx::IRC::Backend::Connect>
+C<$_[ARG0]> is the connection's L<POEx::IRC::Backend::Connect>.
 
 See also: L<POEx::IRC::Backend::Connect/ping_pending>
 
