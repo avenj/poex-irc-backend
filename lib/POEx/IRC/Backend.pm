@@ -455,7 +455,7 @@ sub _create_connector {
   my $remote_addr = delete $args{remoteaddr};
   my $remote_port = delete $args{remoteport};
 
-  die "create_connector expects a RemoteAddr and RemotePort\n"
+  die "create_connector expects a remoteaddr and remoteport\n"
     unless defined $remote_addr and defined $remote_port;
 
   my $protocol =

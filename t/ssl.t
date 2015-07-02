@@ -71,7 +71,7 @@ sub _start {
 sub shutdown {
   my ($k, $backend) = @_[KERNEL, HEAP];
   $k->alarm_remove_all;
-  $k->post( $backend->session_id, 'shutdown' );
+  $backend->shutdown;
   if ($_[ARG0] && $_[ARG0] eq 'timeout') {
     fail("Timed out")
   }
