@@ -139,11 +139,8 @@ has ssl_context => (
 );
 
 
-
 sub spawn {
   my ($class, %args) = @_;
-  # FIXME probably ssl_opts should be an attr and settable from here for
-  # backwards-compat:
   my $ssl_opts = delete $args{ssl_opts};
   my $self = blessed $class ? $class : $class->new(%args);
 
@@ -201,8 +198,7 @@ sub _start {
   $kernel->refcount_increment( $self->session_id, "IRCD Running" );
 }
 
-sub _stop {
-}
+sub _stop {}
 
 sub shutdown {
   my $self = shift;
@@ -247,9 +243,7 @@ sub _idle_alarm {
 
 sub create_listener {
   my $self = shift;
-
   $poe_kernel->post( $self->session_id => create_listener => @_ );
-
   $self
 }
 
@@ -290,34 +284,26 @@ sub _create_listener {
   my (undef, $port) = get_unpacked_addr( $wheel->getsockname );
   $listener->set_port($port) if $port;
 
-  $kernel->post( $self->controller => 
-    ircsock_listener_created => $listener
-  );
+  $kernel->post( $self->controller => ircsock_listener_created => $listener )
 }
 
 sub remove_listener {
   my $self = shift;
-
   $poe_kernel->post( $self->session_id => remove_listener => @_ );
-
   $self
 }
 
 sub _remove_listener {
   my ($kernel, $self) = @_[KERNEL, OBJECT];
   my %args = @_[ARG0 .. $#_];
-
   $args{lc $_} = delete $args{$_} for keys %args;
 
   if (defined $args{listener} && $self->listeners->{ $args{listener} }) {
     my $listener = delete $self->listeners->{ $args{listener} };
-
     $listener->clear_wheel;
-
     $kernel->post( $self->controller =>
       ircsock_listener_removed => $listener
     );
-
     return
   }
 
@@ -353,10 +339,8 @@ sub _accept_fail {
   my ($op, $errnum, $errstr, $listener_id) = @_[ARG0 .. ARG3];
 
   my $listener = delete $self->listeners->{$listener_id};
-
   if ($listener) {
     $listener->clear_wheel;
-
     $kernel->post( $self->controller => 
       ircsock_listener_failure => $listener, $op, $errnum, $errstr
     );
@@ -431,9 +415,7 @@ sub _accept_conn {
 
 sub create_connector {
   my $self = shift;
-
   $poe_kernel->post( $self->session_id => create_connector => @_ );
-
   $self
 }
 
