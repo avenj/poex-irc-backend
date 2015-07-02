@@ -1202,11 +1202,9 @@ C<$_[ARG0]> is the Backend's C<$self> object.
 
 =head1 BUGS
 
-Probably lots. Please report them via RT, e-mail, or GitHub
+Probably lots. Please report them via RT, e-mail, IRC
+(C<irc.cobaltirc.org#perl>), or GitHub
 (L<http://github.com/avenj/poex-irc-backend>).
-
-Tests are a bit incomplete, as of this writing. 
-Zlib and SSL are mostly untested.
 
 =head1 SEE ALSO
 
