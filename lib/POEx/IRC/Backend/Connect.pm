@@ -141,16 +141,14 @@ sub get_socket {
 
 POEx::IRC::Backend::Connect - A connected IRC socket
 
-=head1 SYNOPSIS
-
-Typically created by L<POEx::IRC::Backend> to represent an established
-connection.
-
 =head1 DESCRIPTION
 
-These objects contain details regarding connected socket 
-L<POE::Wheel::ReadWrite> wheels managed by 
-L<POEx::IRC::Backend>.
+These objects contain details regarding connected socket
+L<POE::Wheel::ReadWrite> wheels managed by L<POEx::IRC::Backend>.
+
+These objects are typically created by a successfully connected
+L<POEx::IRC::Backend::Connector> or an accepted connection to a
+L<POEx::IRC::Backend::Listener>.
 
 =head2 CONSUMES
 
@@ -190,7 +188,7 @@ See also: L</ping_pending>, L<POEx::IRC::Backend/ircsock_connection_idle>
 =head3 is_disconnecting
 
 Boolean false if the Connect is not in a disconnecting state; if it is 
-true, it is the disconnect message:
+true, it is the disconnect message (for use by higher-level layers):
 
   $obj->is_disconnecting("Client quit")
 
@@ -200,13 +198,15 @@ See also: L<POEx::IRC::Backend/disconnect>
 
 =head3 is_client
 
-Boolean true if the connection wheel has been marked as a client.
+Boolean true if the connection wheel has been marked as a client; for use by
+higher-level layers to help tag Connects.
 
 B<rw> attribute.
 
 =head3 is_peer
 
-Boolean true if the connection wheel has been marked as a peer.
+Boolean true if the connection wheel has been marked as a peer; for use by
+higher-level layers to help tag Connects.
 
 B<rw> attribute.
 

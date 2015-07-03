@@ -1,8 +1,5 @@
 (loosely priority-ordered)
 
 # Test improvements.
-  - disconnect behavior (check stash)
+  - disconnect behavior (check git stash)
   - peer-to-peer zlib
-
-# IP blacklisting for Listeners
-  - per-backend and/or per-listener
