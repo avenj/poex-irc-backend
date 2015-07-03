@@ -693,14 +693,14 @@ sub _disconnected {
   $poe_kernel->alarm_remove( $this_conn->alarm_id ) 
     if $this_conn->has_alarm_id;
 
+  ## Already a dead Connect (wheel was cleared), nothing to do
+  return unless $this_conn->has_wheel;
+
   if (RUNNING_IN_HELL) {
     $this_conn->wheel->shutdown_input;
     $this_conn->wheel->shutdown_output;
   }
 
-  ## Higher layers may still have a $conn object bouncing about.
-  ## They should check ->has_wheel to determine if the Connect obj
-  ## has been disconnected (no longer has a wheel).
   $this_conn->clear_wheel;
 
   $poe_kernel->post( $self->controller => 
