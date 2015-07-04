@@ -21,6 +21,8 @@ my $conn = POEx::IRC::Backend::Connect->new(
 
 ok $conn->does('POEx::IRC::Backend::Role::HasWheel'),
   'consumes POEx::IRC::Backend::Role::HasWheel';
+ok $conn->has_wheel, 'has_wheel ok';
+cmp_ok $conn->wheel_id, '==', 1234, 'wheel_id ok';
 
 # (ro) args
 ok $conn->has_args, 'has_args ok';
