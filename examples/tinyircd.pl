@@ -35,6 +35,7 @@ my $backend;  # POEx::IRC::Backend
 my %conns;    # live connects pre-registration, keyed on obj identity
 my %users;    # registered connects, keyed on obj identity
 my %nicks;    # registered connects, keyed on lc_irc nickname
+my %chans;    # known channels, keyed on lc_Irc channame
 sub get_user_by_conn { my $conn = shift; $users{$conn+0} }
 sub get_user_by_nick { my $nick = shift; $nicks{lc_irc $nick} }
 sub get_preregistered { my $conn = shift; $conns{$conn+0} }
@@ -62,6 +63,7 @@ sub ircsock_listener_open {
       params  => [
         'AUTH',
         '*** Looking up your hostname...',
+        '*** Connected to POEx::IRC::Backend example',
       ],
     ),
     $conn
@@ -113,7 +115,7 @@ sub ircsock_input {
   $this_conn->ping_pending(0) if $this_conn->ping_pending;
 
   my $cmd = lc $input_obj->command;
-  my $meth = 'irccmd_'.$cmd;
+  my $meth = 'irccmd_'.($cmd eq 'notice' ? 'privmsg' : $cmd);
   
   unless ($cmd =~ m/^[a-z]$/ && $self->can($meth)) {
     # FIXME bad cmd rpl (IRC::Toolkit)
@@ -154,7 +156,15 @@ sub irccmd_nick {
 }
 
 sub irccmd_ping {
-
+  my ($self, $input, $conn) = @_;
+  $backend->send(
+    ircmsg(
+      prefix  => 'tinyircd',
+      command => 'PONG',
+      params  => [ $input->get(0) || time ],
+    ),
+    $conn
+  );
 }
 
 sub irccmd_pong {
@@ -166,19 +176,31 @@ sub irccmd_quit {
 }
 
 sub irccmd_join {
-  # FIXME only allow modeless (+) channels
+  my ($self, $input, $conn) = @_;
+  my $channel = $input->params->get(0);
+  # FIXME 461 unless $channel
+
+  unless ( substr($channel, 0, 1) eq '+' ) {
+    # FIXME illegal channel rpl
+    return
+  }
+
+  # FIXME return if $user->{channels}->{$thischan}
+  # FIXME relay JOIN
+  # FIXME add to $user->{channels}, $chans{$thischan}
 }
 
 sub irccmd_part {
-
+  my ($self, $input, $conn) = @_:
+  my $channel = $input->params->get(0);
+  # FIXME 461 unless $channel
+  # FIXME not-on-channel rpl unless $user->{channels}->{$thischan}
+  # FIXME relay PART, remove from $user->{$channels}->{$thischan}, %chans
 }
 
 sub irccmd_privmsg {
-
-}
-
-sub irccmd_notice {
-
+  # FIXME
+  # also NOTICE handler
 }
 
 sub client_quit {
