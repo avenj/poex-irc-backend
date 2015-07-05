@@ -30,7 +30,15 @@ POE::Session->create(
 );
 
 # If this were real, you would probably want Moo(se) attributes and POE
-# object_states, but lexicals will do us:
+# object_states, but lexicals will do us;
+#   $user_ref = +{
+#
+#   }
+#
+#   $conns{$conn+0} = $user_ref   (preregistration)
+#   $users{$conn+0} = $user_ref
+#   $nicks{lc_irc $nick} = $user_ref
+#   $chans{lc_irc $chan} = [ @nicknames ]
 my $backend;  # POEx::IRC::Backend
 my %conns;    # live connects pre-registration, keyed on obj identity
 my %users;    # registered connects, keyed on obj identity
@@ -196,6 +204,18 @@ sub irccmd_part {
   # FIXME 461 unless $channel
   # FIXME not-on-channel rpl unless $user->{channels}->{$thischan}
   # FIXME relay PART, remove from $user->{$channels}->{$thischan}, %chans
+}
+
+sub irccmd_names {
+
+}
+
+sub irccmd_who {
+
+}
+
+sub irccmd_whois {
+
 }
 
 sub irccmd_privmsg {
