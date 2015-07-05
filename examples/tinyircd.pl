@@ -31,9 +31,13 @@ POE::Session->create(
 
 # If this were real, you would probably want Moo(se) attributes and POE
 # object_states, but lexicals will do us:
+my $backend;  # POEx::IRC::Backend
 my %conns;    # live connects pre-registration, keyed on obj identity
 my %users;    # registered connects, keyed on obj identity
-my $backend;  # POEx::IRC::Backend
+my %nicks;    # registered connects, keyed on lc_irc nickname
+sub get_user_by_conn { my $conn = shift; $users{$conn+0} }
+sub get_user_by_nick { my $nick = shift; $nicks{lc_irc $nick} }
+sub get_preregistered { my $conn = shift; $conns{$conn+0} }
 
 sub _start {
   $backend = POEx::IRC::Backend->spawn;
@@ -117,8 +121,8 @@ sub ircsock_input {
   }
 
   # only NICK/USER/QUIT allowed for preregistration
-  return unless
-    exists $users{$this_conn+0} 
+  # (everything else is a no-op)
+  return unless get_user($this_conn)
     or grep {; $cmd eq $_ } qw/NICK USER QUIT/;
 
   $self->$meth($input_obj, $this_conn);
@@ -133,6 +137,7 @@ sub irccmd_user {
   #  may have NICK already, run ->check_if_registered
   #  set is_client on registration, send intro rpls,
   #  $users{$conn+0} = delete $conns{$conn+0}
+  #  (probably forcejoin to +lobby too)
 }
 
 sub irccmd_nick {
@@ -161,7 +166,7 @@ sub irccmd_quit {
 }
 
 sub irccmd_join {
-
+  # FIXME only allow modeless (+) channels
 }
 
 sub irccmd_part {
@@ -178,7 +183,7 @@ sub irccmd_notice {
 
 sub client_quit {
   my ($self, $conn, $msg) = @_;
-  # FIXME relay QUIT
+  # FIXME relay QUIT if this user's live
   $backend->disconnect($conn, $msg);  
 }
 
