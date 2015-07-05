@@ -11,9 +11,20 @@ use IRC::Toolkit;
 
 my $port = 6667;
 my $addr = '127.0.0.1';
-# FIXME getopts:
-#   --port
-#   --bind
+
+GetOptions(
+  'port=i' => \$port,
+  'bind=s' => \$addr,
+
+  help => sub {
+    print
+      "POEx::IRC::Backend example\n\n",
+      "  --bind=ADDR   Address to bind to\n",
+      "  --port=PORT   Port to bind to\n",
+    ;
+    exit 0
+  },
+);
 
 POE::Session->create(
   package_states => [
@@ -79,11 +90,13 @@ sub ircsock_listener_open {
 }
 
 sub ircsock_listener_failure {
-
+  my ($listener, $op, $errno, $errstr) = @_[ARG0 .. $#_];
+  warn "Listener socket reported: ($errno) $errstr in operation $op";
+  exit 1
 }
 
 sub ircsock_disconnected {
-
+  # FIXME relay QUIT
 }
 
 sub ircsock_connection_idle {
@@ -207,7 +220,29 @@ sub irccmd_part {
 }
 
 sub irccmd_names {
+  my ($self, $input, $conn) = @_;
+  my $channel = $input->params->get(0);
+  
+  unless (defined $channel) {
+    # FIXME bad params
+  }
 
+  $channel = lc_irc $channel;
+
+  unless (exists $chans{$channel}) {
+    # FIXME no such chan
+  }
+
+  # FIXME iterate over X names per line
+  $backend->send(
+    ircmsg(
+      prefix  => 'tinyircd',
+      command => 'NAMES',
+      params  => [ join ' ', @{ $chans{$channel} } ],
+      colonify => 1,
+    ),
+    $conn
+  );
 }
 
 sub irccmd_who {
