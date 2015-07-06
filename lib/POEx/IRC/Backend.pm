@@ -774,8 +774,6 @@ sub unset_compressed_link {
   $self
 }
 
-## FIXME listener connect ip blacklist?
-
 no warnings 'void';
 print
  qq[<CaptObviousman> pretend for a moment that I'm stuck with mysql\n],

@@ -1,5 +1,10 @@
 (loosely priority-ordered)
 
+# Refactor to hide ->wheel
+  - Role::HasWheel; wheel -> _wheel
+    wheel_id grabs/caches from _wheel
+    has_wheel & clear_wheel remain as-is
+
 # Test improvements.
   - disconnect behavior (check git stash)
   - peer-to-peer zlib
