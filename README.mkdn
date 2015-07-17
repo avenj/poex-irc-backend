@@ -337,8 +337,7 @@ These events are dispatched to the controller session; see ["register"](#registe
 
 Dispatched when a connection wheel has had a compression filter added.
 
-`$_[ARG0]` is the connection's 
-[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect)
+`$_[ARG0]` is the connection's [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect).
 
 ### ircsock\_connection\_idle
 
@@ -346,10 +345,11 @@ Dispatched when a connection wheel has had no input for longer than
 specified idle time (see ["create\_listener"](#create_listener) regarding idle times).
 
 Currently these events are only issued for incoming Connects accepted on a
-Listener, not outgoing Connects created by a Connector.
+Listener, not outgoing Connects created by a Connector; if you need to do
+ping/pong-style heartbeating on an outgoing Connector-spawned socket, you will
+need to run your own timer.
 
-`$_[ARG0]` is the connection's 
-[POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect)
+`$_[ARG0]` is the connection's [POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect).
 
 See also: ["ping\_pending" in POEx::IRC::Backend::Connect](https://metacpan.org/pod/POEx::IRC::Backend::Connect#ping_pending)
 

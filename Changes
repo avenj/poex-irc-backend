@@ -1,5 +1,13 @@
 # Changes for POEx::IRC::Backend
 
+0.030002 2015-07-17
+
+  - Documentation improvements
+
+  - Minor disconnect-related bugfixes
+
+  - Test expansion
+
 0.030001 2015-07-02
 
   - Fix Connector SSL (broken in 0.28.1)
