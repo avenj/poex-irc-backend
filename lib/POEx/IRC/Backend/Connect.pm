@@ -4,7 +4,7 @@ use strictures 2;
 use Types::Standard -all;
 
 
-use Moo;
+use Moo; use MooX::TypeTiny;
 with 'POEx::IRC::Backend::Role::Socket',
      'POEx::IRC::Backend::Role::CheckAvail';
 

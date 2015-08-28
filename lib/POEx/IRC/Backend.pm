@@ -50,7 +50,7 @@ sub get_unpacked_addr {
 }
 
 
-use Moo 2;
+use Moo; use MooX::TypeTiny;
 with 'POEx::IRC::Backend::Role::CheckAvail';
 
 
