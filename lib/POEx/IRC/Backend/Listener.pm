@@ -2,7 +2,7 @@ package POEx::IRC::Backend::Listener;
 
 use Types::Standard -types;
 
-use Moo;
+use Moo; use MooX::TypeTiny;
 with 'POEx::IRC::Backend::Role::Socket',
      'POEx::IRC::Backend::Role::HasEndpoint';
 
