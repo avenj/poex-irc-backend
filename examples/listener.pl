@@ -47,5 +47,7 @@ sub _start {
 
 sub _default {
   my ($event, $args) = @_[ARG0, ARG1];
+  local $Data::Dumper::Terse = 1;
+  local $Data::Dumper::Quotekeys = 0;
   say "$event - ".Dumper($args)
 }
