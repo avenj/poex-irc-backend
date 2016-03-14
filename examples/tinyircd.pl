@@ -212,7 +212,7 @@ sub irccmd_join {
 }
 
 sub irccmd_part {
-  my ($self, $input, $conn) = @_:
+  my ($self, $input, $conn) = @_;
   my $channel = $input->params->get(0);
   # FIXME 461 unless $channel
   # FIXME not-on-channel rpl unless $user->{channels}->{$thischan}
