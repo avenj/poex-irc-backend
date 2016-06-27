@@ -775,9 +775,21 @@ sub unset_compressed_link {
 }
 
 no warnings 'void';
-print
- qq[<CaptObviousman> pretend for a moment that I'm stuck with mysql\n],
- qq[<rnowak> ok, fetching my laughing hat and monocle\n],
+print <<'EOT'
+  (CLASS)
+  + (ROLES)
+POEx::IRC::Backend
+     + ::Role::CheckAvail
+    POEx::IRC::Backend::Connect    # Active connection
+     + ::Role::CheckAvail
+     + ::Role::Socket ( + ::Role::HasWheel )
+    POEx::IRC::Backend::Connector  # Outgoing connector
+     + ::Role::HasEndpoint
+     + ::Role::Socket ( + ::Role::HasWheel )
+    POEx::IRC::Backend::Listener   # Open listener
+     + ::Role::HasEndpoint
+     + ::Role::Socket ( + ::Role::HasWheel )
+EOT
 unless caller; 1;
 
 
