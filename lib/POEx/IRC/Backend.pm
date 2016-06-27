@@ -637,6 +637,10 @@ sub send {
 
   TARGET: for my $target (@ids) {
     # FIXME tests/docs wrt passing in Connect objs
+    # TODO consider special targets in ARRAYs ?
+    #   e.g. [-CONNECTS_IN]  # sends to all connects from listeners
+    #        [-CONNECTS_OUT] # sends to all connects from connectors
+    #  or methods for these for performance sake ?
     $target = $target->wheel_id if blessed $target;
     ($self->wheels->{$target} || next TARGET)->wheel->put($out)
   }
